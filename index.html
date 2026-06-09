@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TheVault — Personal AI Second Brain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Claude-app palette — warm charcoal + Anthropic amber */
+      --bg:           #1a1a1a;
+      --surface:      #222222;
+      --elevated:     #2c2c2c;
+      --text:         #ececec;
+      --text-mid:     rgba(236,236,236,.55);
+      --text-low:     rgba(236,236,236,.30);
+      --accent:       #cc7a3a;
+      --accent-bright:#e3975c;
+      --accent-dim:   rgba(204,122,58,.14);
+      --accent-glow:  rgba(204,122,58,.30);
+      --accent-brd:   rgba(204,122,58,.45);
+      /* glass (floating elements only) */
+      --glass:        rgba(26,26,26,.72);
+      --glass-hi:     rgba(44,44,44,.85);
+      --glass-brd:    rgba(255,255,255,.08);
+      --glass-brd-hi: rgba(255,255,255,.16);
+      --radius:       14px;
+      --blur:         blur(28px) saturate(180%);
+      --shadow:       0 14px 44px rgba(0,0,0,.45);
+      --sans:         -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
+
+    /* ── WARM BACKDROP ─────────────────────────────── */
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(52% 40% at 50% 4%, rgba(204,122,58,.12), transparent 62%),
+        radial-gradient(60% 50% at 50% 102%, rgba(204,122,58,.05), transparent 66%),
+        linear-gradient(180deg, #1c1b19 0%, #191917 100%);
+    }
+
+    /* ── NOISE ─────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9999;
+      opacity: .16;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
+    }
+
+    /* ── NAV (floating glass bar) ───────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 28px; margin: 14px 22px; border-radius: var(--radius);
+      background: var(--glass);
+      -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-brd);
+      box-shadow: 0 8px 30px rgba(0,0,0,.3);
+      transition: background .3s, box-shadow .3s, margin .3s;
+    }
+    nav.scrolled { background: rgba(20,20,20,.82); margin: 8px 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 400;
+      font-size: 22px; color: var(--accent);
+      letter-spacing: .04em;
+    }
+    .nav-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px; color: var(--text-mid);
+      letter-spacing: .12em;
+      padding: 7px 13px; border-radius: 999px;
+      background: rgba(255,255,255,.04); border: 1px solid var(--glass-brd);
+    }
+
+    /* ── HERO ───────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 160px 48px 96px;
+      position: relative; overflow: hidden;
+    }
+
+    .hero-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 38px 38px;
+      -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 45%, black 0%, transparent 100%);
+      mask-image: radial-gradient(ellipse 75% 60% at 50% 45%, black 0%, transparent 100%);
+      opacity: .5;
+    }
+
+    .hero-glow {
+      position: absolute; top: 44%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 720px; height: 400px;
+      background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none; opacity: .5;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 9px;
+      position: relative; z-index: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: .18em;
+      color: var(--accent); text-transform: uppercase;
+      padding: 9px 17px; border-radius: 999px;
+      background: var(--accent-dim); border: 1px solid var(--accent-brd);
+      -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+      margin-bottom: 34px;
+      opacity: 0; animation: up .7s ease .15s forwards;
+    }
+    .hero-eyebrow::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 10px var(--accent);
+    }
+
+    .hero-title {
+      position: relative; z-index: 1;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 300;
+      font-size: clamp(84px, 13vw, 152px);
+      line-height: .92; letter-spacing: -.01em;
+      color: var(--text);
+      margin-bottom: 34px;
+      opacity: 0; animation: up 1s ease .3s forwards;
+    }
+    .hero-title em {
+      font-style: inherit;
+      background: linear-gradient(120deg, var(--accent-bright), var(--accent));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    .hero-sub {
+      position: relative; z-index: 1;
+      font-size: 15px; color: var(--text-mid);
+      max-width: 520px; line-height: 1.75;
+      opacity: 0; animation: up .7s ease .55s forwards;
+    }
+
+    .hero-cta {
+      position: relative; z-index: 1;
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      margin-top: 40px;
+      opacity: 0; animation: up .7s ease .7s forwards;
+    }
+    .btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+      padding: 14px 26px; border-radius: 999px; text-decoration: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 9px;
+      transition: transform .2s, box-shadow .25s, background .25s, border-color .25s;
+    }
+    .btn-primary {
+      color: #1a120a;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      box-shadow: 0 8px 26px rgba(204,122,58,.30);
+    }
+    .btn-primary:hover { transform: translateY(-2px); background: var(--accent-bright); box-shadow: 0 12px 36px rgba(204,122,58,.44); }
+    .btn-ghost {
+      color: var(--text); background: rgba(255,255,255,.04);
+      border: 1px solid var(--glass-brd);
+      -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+    }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: var(--glass-brd-hi); background: rgba(255,255,255,.08); }
+
+    .hero-caret {
+      position: relative; z-index: 1;
+      margin-top: 52px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      opacity: 0; animation: up .7s ease .9s forwards;
+    }
+    .hero-caret span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: .18em;
+      color: var(--text-low); text-transform: uppercase;
+    }
+    .caret-line {
+      width: 1px; height: 44px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: blink 2.2s ease-in-out infinite;
+    }
+
+    /* ── STATS (floating glass card) ────────────────── */
+    .stats {
+      position: relative; z-index: 2;
+      max-width: 1180px; margin: -70px auto 0;
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      background: var(--glass); border: 1px solid var(--glass-brd);
+      border-radius: var(--radius);
+      -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .stat { text-align: center; padding: 30px 12px; position: relative; }
+    .stat + .stat::before {
+      content: ''; position: absolute; left: 0; top: 22%; height: 56%;
+      width: 1px; background: var(--glass-brd);
+    }
+    .stat-n {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400; font-size: 42px; line-height: 1; margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+    }
+    .stat-l {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px; letter-spacing: .13em;
+      color: var(--text-mid); text-transform: uppercase;
+    }
+
+    /* ── SHARED SECTION CHROME ──────────────────────── */
+    .section { padding: 96px 40px; max-width: 1200px; margin: 0 auto; position: relative; }
+    #architecture, #capabilities { scroll-margin-top: 100px; }
+    .full-band { padding: 96px 40px; position: relative; }
+    .full-band::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: rgba(255,255,255,.018);
+      border-top: 1px solid var(--glass-brd); border-bottom: 1px solid var(--glass-brd);
+    }
+    .band-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+
+    .eyebrow {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px; letter-spacing: .22em;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 16px; padding: 6px 13px; border-radius: 999px;
+      background: var(--accent-dim); border: 1px solid var(--accent-brd);
+    }
+    .h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 300;
+      font-size: clamp(34px, 4.5vw, 54px);
+      line-height: 1.08; color: var(--text);
+      margin-bottom: 18px;
+    }
+    .lead {
+      font-size: 14px; color: var(--text-mid);
+      line-height: 1.8; max-width: 520px;
+      margin-bottom: 52px;
+    }
+
+    /* ── ARCHITECTURE ───────────────────────────────── */
+    .arch-grid {
+      display: grid; grid-template-columns: 1fr 440px;
+      gap: 72px; align-items: center;
+    }
+    .arch-svg {
+      width: 100%;
+      background: var(--surface); border: 1px solid var(--glass-brd);
+      border-radius: var(--radius); padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── FEATURES (calm surface cards) ──────────────── */
+    .features {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .js .features.reveal { opacity: 1; transform: none; }   /* container static; children stagger */
+
+    .feat {
+      position: relative; overflow: hidden;
+      background: var(--surface); border: 1px solid var(--glass-brd);
+      border-radius: var(--radius); padding: 30px 26px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.22);
+      transition: opacity .55s ease, transform .35s cubic-bezier(.2,.7,.2,1),
+                  background .3s ease, border-color .3s ease, box-shadow .3s ease;
+    }
+    .js .feat { opacity: 0; }
+    .features.in .feat { opacity: 1; }
+    .features.in .feat:nth-child(1)  { transition-delay: .05s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(2)  { transition-delay: .10s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(3)  { transition-delay: .15s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(4)  { transition-delay: .20s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(5)  { transition-delay: .25s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(6)  { transition-delay: .30s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(7)  { transition-delay: .35s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(8)  { transition-delay: .40s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(9)  { transition-delay: .45s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(10) { transition-delay: .50s, 0s, 0s, 0s, 0s; }
+    .feat:hover {
+      transform: translateY(-4px); background: var(--elevated);
+      border-color: var(--glass-brd-hi); box-shadow: 0 16px 40px rgba(0,0,0,.4);
+    }
+
+    .feat-num {
+      position: absolute; top: 22px; right: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: .1em; color: var(--text-low);
+    }
+    .feat-icon {
+      width: 46px; height: 46px; padding: 11px;
+      color: var(--accent); margin-bottom: 18px;
+      background: var(--accent-dim); border: 1px solid var(--accent-brd);
+      border-radius: 10px;
+    }
+    .feat-title {
+      font-size: 15px; font-weight: 600;
+      color: var(--text); margin-bottom: 10px;
+      letter-spacing: .01em;
+    }
+    .feat-body {
+      font-size: 12.5px; color: var(--text-mid);
+      line-height: 1.75;
+    }
+    .feat-tag {
+      display: inline-block; margin-top: 18px; margin-right: 6px;
+      padding: 5px 11px; border-radius: 999px;
+      background: rgba(255,255,255,.04); border: 1px solid var(--glass-brd);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px; letter-spacing: .07em;
+      color: var(--text-mid);
+    }
+
+    /* ── FEATURED FEAT ─────────────────────────────── */
+    .feat.featured {
+      grid-column: 1 / -1;
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 48px; align-items: start;
+    }
+    .feat.featured .feat-num { position: static; margin-bottom: 18px; }
+    .feat.featured .feat-title { font-size: 16px; margin-top: 4px; }
+    .feat.featured .feat-body { font-size: 13px; line-height: 1.85; margin-top: 4px; }
+    .feat-left { display: flex; flex-direction: column; }
+    .feat-right { padding-top: 4px; }
+    .feat-pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+
+    /* ── ACCENT FEAT (VaultChat — the one distinct hue) ── */
+    .feat.accent {
+      background-color: var(--surface);
+      background-image: linear-gradient(160deg, var(--accent-dim), transparent 68%);
+      border-color: var(--accent-brd);
+      box-shadow: 0 10px 36px rgba(204,122,58,.14);
+    }
+    .feat.accent:hover {
+      transform: translateY(-4px);
+      background-image: linear-gradient(160deg, rgba(204,122,58,.22), transparent 68%);
+      border-color: var(--accent-brd);
+      box-shadow: 0 20px 52px rgba(204,122,58,.24);
+    }
+
+    /* ── HOW IT WORKS ───────────────────────────────── */
+    .steps {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 0; margin-top: 60px; position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 29px; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent-brd) 20%, var(--accent-brd) 80%, transparent);
+    }
+    .step {
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 0 12px;
+    }
+    .step-ring {
+      width: 58px; height: 58px; border-radius: 50%;
+      border: 1px solid var(--accent-brd);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; color: var(--accent);
+      margin-bottom: 22px; position: relative; z-index: 1;
+      transition: transform .3s, background .3s, box-shadow .3s;
+    }
+    .step:hover .step-ring {
+      transform: translateY(-3px);
+      background: var(--accent-dim);
+      box-shadow: 0 0 26px var(--accent-glow);
+    }
+    .step-title {
+      font-size: 13px; font-weight: 600;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .step-body {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text-mid);
+      line-height: 1.7;
+    }
+
+    /* ── TECH STACK (glass chips) ───────────────────── */
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 9px;
+      margin-top: 30px;
+    }
+    .chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 15px; border-radius: 999px;
+      background: rgba(255,255,255,.04); border: 1px solid var(--glass-brd);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; color: var(--text-mid);
+      transition: transform .2s, border-color .2s, color .2s, background .2s;
+    }
+    .chip:hover { transform: translateY(-2px); border-color: var(--accent-brd); color: var(--text); background: rgba(255,255,255,.07); }
+    .chip-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent); flex-shrink: 0;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--glass-brd);
+      padding: 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative;
+    }
+    .footer-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 400;
+      font-size: 18px; color: var(--accent);
+    }
+    .footer-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px; color: var(--text-low);
+      letter-spacing: .1em;
+    }
+
+    /* ── KEYFRAMES ──────────────────────────────────── */
+    @keyframes up {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: .3; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── SCROLL REVEAL ──────────────────────────────── */
+    .js .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal-d1 { transition-delay: .1s; }
+    .reveal-d2 { transition-delay: .2s; }
+    .reveal-d3 { transition-delay: .3s; }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 14px 20px; margin: 10px 12px; }
+      .section, .full-band { padding: 72px 24px; }
+      .arch-grid { grid-template-columns: 1fr; gap: 44px; }
+      .features { grid-template-columns: 1fr; }
+      .feat.featured { grid-template-columns: 1fr; gap: 22px; }
+      .feat.featured .feat-num { margin-bottom: 12px; }
+      .stats { grid-template-columns: repeat(3, 1fr); margin-top: -50px; }
+      .stat:nth-child(3)::before,
+      .stat:nth-child(n+4)::before { display: none; }
+      .steps { grid-template-columns: repeat(2, 1fr); gap: 36px 12px; }
+      .steps::before { display: none; }
+    }
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .hero-cta { flex-direction: column; width: 100%; max-width: 280px; }
+      .btn { justify-content: center; }
+    }
+  </style>
+  <script>document.documentElement.className = 'js';</script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">TheVault</div>
+  <div class="nav-meta">Built by Suryanshu · 2026</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">Personal AI Second Brain</div>
+  <h1 class="hero-title">The<em>Vault</em></h1>
+  <p class="hero-sub">
+    A personal AI OS — a me-layer that knows you, backed by federated
+    knowledge wikis and a self-curating memory that grows with every session.
+    Built entirely on Claude Code. Runs locally. Compounds over time.
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="#capabilities">Explore capabilities</a>
+    <a class="btn btn-ghost" href="#architecture">See the architecture</a>
+  </div>
+  <div class="hero-caret">
+    <span>Explore</span>
+    <div class="caret-line"></div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-n">206</div>
+    <div class="stat-l">Concept Pages</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n">5</div>
+    <div class="stat-l">Active Wikis</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n">1,800+</div>
+    <div class="stat-l">Vectors Embedded</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n">4</div>
+    <div class="stat-l">Models Orchestrated</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n">8+</div>
+    <div class="stat-l">Custom Skills</div>
+  </div>
+  <div class="stat">
+    <div class="stat-n">0</div>
+    <div class="stat-l">Manual Catalog Steps</div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="full-band" id="architecture">
+  <div class="band-inner arch-grid">
+
+    <div class="reveal">
+      <div class="eyebrow">System Design</div>
+      <h2 class="h2">Two doors,<br>one second brain</h2>
+      <p class="lead">
+        The me-layer is the front door — you talk to your personal context
+        first. From there it operates in two modes: ASK (qmd retrieves
+        relevant chunks from knowledge wikis, fast and cheap) or MAINTAIN
+        (full wiki schema loads only when editing). Knowledge wikis stay
+        isolated; they serve you, they don't address you. And there are now
+        two ways in: the desktop Claude Code session, and VaultChat on your
+        phone — the same me-layer, a second entryway.
+      </p>
+      <div class="chips">
+        <div class="chip"><div class="chip-dot"></div>desktop door · Claude Code</div>
+        <div class="chip"><div class="chip-dot"></div>phone door · VaultChat</div>
+        <div class="chip"><div class="chip-dot"></div>ASK / MAINTAIN modes</div>
+        <div class="chip"><div class="chip-dot"></div>Git-versioned pages</div>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE SVG — two front doors into the me-layer -->
+    <svg class="arch-svg reveal reveal-d2" viewBox="0 0 400 348" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" markerWidth="7" markerHeight="5" refX="6.5" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="rgba(204,122,58,.55)"/>
+        </marker>
+      </defs>
+
+      <!-- TWO FRONT DOORS -->
+      <!-- desktop door  x=18 w=174 center=105 -->
+      <rect x="18" y="6" width="174" height="46" rx="7" fill="#2c2c2c" stroke="rgba(255,255,255,.14)" stroke-width="1"/>
+      <text x="105" y="26" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#ececec">Desktop · Claude Code</text>
+      <text x="105" y="40" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="rgba(236,236,236,.5)">session entry</text>
+
+      <!-- phone door (VaultChat) — amber, the second entryway  x=208 w=174 center=295 -->
+      <rect x="208" y="6" width="174" height="46" rx="7" fill="#2c2417" stroke="rgba(204,122,58,.55)" stroke-width="1.2"/>
+      <text x="295" y="26" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#cc7a3a">VaultChat · Phone</text>
+      <text x="295" y="40" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="rgba(236,236,236,.5)">Today + Chat · offline + Tailscale</text>
+
+      <!-- converging arrows into me-layer -->
+      <line x1="105" y1="52" x2="165" y2="76" stroke="rgba(204,122,58,.4)" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="295" y1="52" x2="235" y2="76" stroke="rgba(204,122,58,.4)" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- ME-LAYER (front door) -->
+      <rect x="18" y="78" width="364" height="52" rx="7" fill="#2c2417" stroke="rgba(204,122,58,.9)" stroke-width="1.5"/>
+      <text x="200" y="101" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#cc7a3a">Personal Wiki — me-layer</text>
+      <text x="200" y="118" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="rgba(236,236,236,.55)">front door · ASK / MAINTAIN · living memory</text>
+
+      <!-- split connector to 4 knowledge wikis -->
+      <line x1="200" y1="130" x2="200" y2="141" stroke="rgba(204,122,58,.32)" stroke-width="1"/>
+      <line x1="60"  y1="141" x2="340" y2="141" stroke="rgba(204,122,58,.32)" stroke-width="1"/>
+      <line x1="60"  y1="141" x2="60"  y2="150" stroke="rgba(204,122,58,.32)" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="153" y1="141" x2="153" y2="150" stroke="rgba(204,122,58,.32)" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="246" y1="141" x2="246" y2="150" stroke="rgba(204,122,58,.32)" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="340" y1="141" x2="340" y2="150" stroke="rgba(204,122,58,.32)" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- 4 KNOWLEDGE WIKIS (neutral) -->
+      <rect x="18"  y="152" width="84" height="44" rx="6" fill="#222222" stroke="rgba(255,255,255,.13)" stroke-width="1"/>
+      <text x="60"  y="172" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#ececec">Academics</text>
+      <text x="60"  y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="rgba(236,236,236,.5)">167 pages</text>
+
+      <rect x="111" y="152" width="84" height="44" rx="6" fill="#222222" stroke="rgba(255,255,255,.13)" stroke-width="1"/>
+      <text x="153" y="172" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#ececec">Swimming</text>
+      <text x="153" y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="rgba(236,236,236,.5)">McEvoy method</text>
+
+      <rect x="204" y="152" width="84" height="44" rx="6" fill="#222222" stroke="rgba(255,255,255,.13)" stroke-width="1"/>
+      <text x="246" y="172" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#ececec">F1 Analysis</text>
+      <text x="246" y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="rgba(236,236,236,.5)">FastF1 data</text>
+
+      <rect x="297" y="152" width="84" height="44" rx="6" fill="#222222" stroke="rgba(255,255,255,.13)" stroke-width="1"/>
+      <text x="339" y="172" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#ececec">Construct</text>
+      <text x="339" y="186" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="rgba(236,236,236,.5)">AI playbooks</text>
+
+      <!-- merge connector into RAG -->
+      <line x1="60"  y1="196" x2="60"  y2="210" stroke="rgba(204,122,58,.32)" stroke-width="1"/>
+      <line x1="153" y1="196" x2="153" y2="210" stroke="rgba(204,122,58,.32)" stroke-width="1"/>
+      <line x1="246" y1="196" x2="246" y2="210" stroke="rgba(204,122,58,.32)" stroke-width="1"/>
+      <line x1="340" y1="196" x2="340" y2="210" stroke="rgba(204,122,58,.32)" stroke-width="1"/>
+      <line x1="60"  y1="210" x2="340" y2="210" stroke="rgba(204,122,58,.32)" stroke-width="1"/>
+      <line x1="200" y1="210" x2="200" y2="226" stroke="rgba(204,122,58,.32)" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- LOCAL RAG -->
+      <rect x="18" y="228" width="364" height="44" rx="7" fill="#222222" stroke="rgba(204,122,58,.5)" stroke-width="1.3"/>
+      <text x="200" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#cc7a3a">Local RAG — qmd</text>
+      <text x="200" y="266" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgba(236,236,236,.55)">BM25 + vector · 3 collections · 6GB GPU</text>
+
+      <!-- arrow to hooks -->
+      <line x1="200" y1="272" x2="200" y2="288" stroke="rgba(204,122,58,.4)" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- STOP HOOKS -->
+      <rect x="18" y="290" width="364" height="46" rx="7" fill="#222222" stroke="rgba(255,255,255,.14)" stroke-width="1"/>
+      <text x="200" y="312" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#ececec">Python Stop Hooks</text>
+      <text x="200" y="328" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="rgba(236,236,236,.55)">post-ingest: log.md · refresh-stats: dashboard JSON</text>
+      <rect x="336" y="298" width="34" height="16" rx="4" fill="rgba(204,122,58,.18)"/>
+      <text x="353" y="310" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#cc7a3a" letter-spacing="1">AUTO</text>
+    </svg>
+
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="capabilities">
+  <div class="reveal">
+    <div class="eyebrow">Capabilities</div>
+    <h2 class="h2">Everything<br>that makes it work</h2>
+  </div>
+
+  <div class="features reveal">
+
+    <!-- 01 -->
+    <div class="feat">
+      <div class="feat-num">01</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="10" y="2" width="16" height="28" rx="3"/>
+        <circle cx="18" cy="27" r="1.2" fill="currentColor" stroke="none"/>
+        <path d="M14 6h8" stroke-linecap="round"/>
+        <path d="M4 14h6M26 14h6" stroke-linecap="round" opacity=".5"/>
+        <path d="M4 14l3 3-3 3" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>
+      </svg>
+      <div class="feat-title">VaultChat — Phone Front Door</div>
+      <div class="feat-body">
+        A second front door — the vault on your phone. Two surfaces: Today logs your day
+        offline-first and AI-free, straight into the daily file; Chat is the full you-first
+        agent you talk to, and it drafts plans and memory edits for you to confirm before
+        they're written. A PWA on FastAPI + SQLite, reachable anywhere through a private
+        Tailscale tunnel. v1 live, validated on-device.
+      </div>
+      <div class="feat-tag">talk · plan · log</div>
+      <div class="feat-tag">v1 live on phone</div>
+    </div>
+
+    <!-- 02 -->
+    <div class="feat">
+      <div class="feat-num">02</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="18" cy="12" r="6"/>
+        <path d="M18 18v10"/>
+        <path d="M10 28c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        <path d="M4 20c2-3 5-4 8-3M32 20c-2-3-5-4-8-3"/>
+      </svg>
+      <div class="feat-title">Me-Layer Intelligence</div>
+      <div class="feat-body">
+        The personal wiki is the front door. It holds your logs, obligations, and
+        how-you-function model. You address it first; knowledge wikis are what it
+        reaches into. One fixed rule: suggest, recommend, push back — never decide for you.
+      </div>
+      <div class="feat-tag">you-first</div>
+    </div>
+
+    <!-- 03 -->
+    <div class="feat">
+      <div class="feat-num">03</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="18" cy="18" r="13"/>
+        <path d="M18 5v26M5 18h26"/>
+        <path d="M8 8l20 20M28 8L8 28"/>
+        <circle cx="18" cy="18" r="4" fill="currentColor" opacity=".2" stroke="none"/>
+      </svg>
+      <div class="feat-title">Local RAG Search</div>
+      <div class="feat-body">
+        3-stage retrieval funnel: BM25 keyword + vector semantic hybrid. 1,800+
+        vectors across 3 collections on a local 6GB GPU. Section Map targeting
+        avoids reading full pages.
+      </div>
+      <div class="feat-tag">qmd engine</div>
+    </div>
+
+    <!-- 04 -->
+    <div class="feat">
+      <div class="feat-num">04</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M7 28V14l11-7 11 7v14"/>
+        <path d="M14 28v-7h8v7"/>
+        <circle cx="28" cy="10" r="4" fill="currentColor" opacity=".25" stroke="none"/>
+        <path d="M26 8l2 2 4-4" stroke-width="1.2"/>
+      </svg>
+      <div class="feat-title">Automated Catalog Maintenance</div>
+      <div class="feat-body">
+        Two Python hooks fire automatically. A PostToolUse sentinel tracks every
+        wiki edit as it happens. At session end, a Stop hook writes log.md from
+        staged metadata — pages created, pages updated, source. Stats and vault
+        diagnostics refresh async. Zero tokens, zero manual steps.
+      </div>
+      <div class="feat-tag">stop hook pipeline</div>
+    </div>
+
+    <!-- 05 -->
+    <div class="feat">
+      <div class="feat-num">05</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="4" y="4" width="28" height="28" rx="3"/>
+        <path d="M4 12h28M12 4v8"/>
+        <path d="M9 19h18M9 25h11"/>
+        <rect x="23" y="20" width="7" height="7" rx="1" fill="currentColor" opacity=".15" stroke="none"/>
+      </svg>
+      <div class="feat-title">Opinionated Knowledge Structure</div>
+      <div class="feat-body">
+        Strict concept page templates enforce Intuition → Key Idea → Derivation →
+        Worked Example. Auto-file vs. propose vs. never rules. Methodology stances
+        resist silent drift.
+      </div>
+      <div class="feat-tag">schema-enforced</div>
+    </div>
+
+    <!-- 06 -->
+    <div class="feat">
+      <div class="feat-num">06</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="8"  cy="18" r="5"/>
+        <circle cx="28" cy="10" r="5"/>
+        <circle cx="28" cy="26" r="5"/>
+        <path d="M13 16l10-4M13 20l10 4"/>
+      </svg>
+      <div class="feat-title">Multi-Model Orchestration</div>
+      <div class="feat-body">
+        Intelligent task-to-model routing. Haiku for log appends and file moves,
+        Sonnet for standard ingest, Opus for cross-page synthesis and race prep.
+        Minimum tokens, adequate output.
+      </div>
+      <div class="feat-tag">Haiku · Sonnet · Opus</div>
+    </div>
+
+    <!-- 07 -->
+    <div class="feat">
+      <div class="feat-num">07</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="4" y="8" width="28" height="20" rx="3"/>
+        <path d="M10 17h6M10 22h4"/>
+        <path d="M20 15l4 3-4 3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="feat-title">Custom Skills & Slash Commands</div>
+      <div class="feat-body">
+        /hw-concept-map maps problem sets to concept pages. /proj-concept-map builds
+        structured trackers. /marp generates slide decks from wiki content.
+        /notebooklm integrates external sourcing. /diagnose, /grill-me, /handoff,
+        and /zoom-out cover the meta-cognitive layer.
+      </div>
+      <div class="feat-tag">8+ active skills</div>
+    </div>
+
+    <!-- 08 -->
+    <div class="feat">
+      <div class="feat-num">08</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="4" y="6" width="28" height="22" rx="3"/>
+        <path d="M4 13l14 9 14-9"/>
+        <circle cx="28" cy="28" r="5" fill="var(--bg)" stroke="currentColor"/>
+        <path d="M26 28h4M28 26v4" stroke-width="1.2"/>
+      </svg>
+      <div class="feat-title">Daily AI Morning Brief</div>
+      <div class="feat-body">
+        Automated email digest fires at 7am IST via Windows Task Scheduler. Gemini 3.5 Flash
+        with Google Search grounding covers 9 sections — investment, compute,
+        hardware, research, sports science — filtered through your personal profile.
+        19× cheaper than Claude web_search: $0.031/day vs $0.59.
+      </div>
+      <div class="feat-tag">Gemini · Google Search</div>
+    </div>
+
+    <!-- 09 -->
+    <div class="feat">
+      <div class="feat-num">09</div>
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="18" cy="18" r="13"/>
+        <path d="M18 10v8l5 3"/>
+        <path d="M6 18h3M27 18h3M18 6v3M18 27v3" stroke-linecap="round" opacity=".4"/>
+      </svg>
+      <div class="feat-title">Nightly Auto-Commit</div>
+      <div class="feat-body">
+        Windows Task Scheduler fires at midnight. Stages all tracked and untracked
+        changes, exits cleanly if nothing has changed, otherwise snapshots with a
+        dated commit. Status written to a JSON file — the morning digest confirms
+        whether it ran. The vault is always git-safe without a single manual step.
+      </div>
+      <div class="feat-tag">Task Scheduler · git</div>
+    </div>
+
+    <!-- 10 — FEATURED -->
+    <div class="feat featured">
+      <div class="feat-left">
+        <div class="feat-num">10</div>
+        <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+          <ellipse cx="18" cy="12" rx="12" ry="6"/>
+          <path d="M6 12v6c0 3.3 5.4 6 12 6s12-2.7 12-6v-6"/>
+          <path d="M6 18v6c0 3.3 5.4 6 12 6s12-2.7 12-6v-6"/>
+          <circle cx="24" cy="29" r="5" fill="var(--bg)" stroke="currentColor"/>
+          <path d="M22 29h4M24 27v4" stroke-width="1.2"/>
+        </svg>
+        <div class="feat-title">Living Memory System</div>
+        <div class="feat-pill-row">
+          <div class="feat-tag">Hermes-inspired</div>
+          <div class="feat-tag">vault-resident</div>
+          <div class="feat-tag">self-archiving</div>
+        </div>
+      </div>
+      <div class="feat-right">
+        <div class="feat-body">
+          Two-mode memory that evolves with use — no configuration required. The moment
+          you signal something is worth keeping (confirm an approach, say you want a
+          workflow reproducible), it writes automatically and surfaces the write in one line.
+          When it infers a pattern you didn't flag, it asks first. The signal is always
+          yours; the write is automatic on your cue.<br><br>
+          Bounded at 20 active entries. When capacity is reached, stale memories are
+          archived into <code style="font-size:11px;color:var(--accent)">memory/archive/</code>
+          — never deleted, just deprioritised. The full memory store lives physically
+          inside the Vault via a symlink: visible in any editor, version-controlled, portable.
+          Clone the repo to a new machine, create one symlink, memory travels with you.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="full-band">
+  <div class="band-inner">
+    <div class="reveal">
+      <div class="eyebrow">Workflow</div>
+      <h2 class="h2">From conversation<br>to knowledge</h2>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-ring">01</div>
+        <div class="step-title">Talk</div>
+        <div class="step-body">You address the me-layer — from desktop or VaultChat. It knows your context: logs, obligations, training history.</div>
+      </div>
+      <div class="step">
+        <div class="step-ring">02</div>
+        <div class="step-title">Route</div>
+        <div class="step-body">ASK: qmd retrieves relevant chunks from knowledge wikis. MAINTAIN: full wiki schema loads for editing.</div>
+      </div>
+      <div class="step">
+        <div class="step-ring">03</div>
+        <div class="step-title">Synthesize</div>
+        <div class="step-body">Response built from your personal context and knowledge wiki material. Stays in chat — never written back.</div>
+      </div>
+      <div class="step">
+        <div class="step-ring">04</div>
+        <div class="step-title">Write</div>
+        <div class="step-body">Concept page created or updated using the enforced template. Committed to git.</div>
+      </div>
+      <div class="step">
+        <div class="step-ring">05</div>
+        <div class="step-title">Automate</div>
+        <div class="step-body">PostToolUse sentinel tracks edits. Stop hook writes log.md from staged metadata. Stats and diagnostics refresh async.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<section class="section">
+  <div class="reveal">
+    <div class="eyebrow">Stack</div>
+    <h2 class="h2">Built on</h2>
+    <p class="lead">
+      No external databases, no cloud storage. Everything runs locally —
+      model API calls are the only outbound dependency.
+    </p>
+  </div>
+
+  <div class="chips reveal">
+    <div class="chip"><div class="chip-dot"></div>Claude Code (Sonnet 4.6 · Opus 4.8 · Haiku 4.5)</div>
+    <div class="chip"><div class="chip-dot"></div>Python stop hooks — zero-token pipeline</div>
+    <div class="chip"><div class="chip-dot"></div>qmd — local RAG engine</div>
+    <div class="chip"><div class="chip-dot"></div>VaultChat PWA — FastAPI · SQLite · offline-first</div>
+    <div class="chip"><div class="chip-dot"></div>Tailscale — private remote access</div>
+    <div class="chip"><div class="chip-dot"></div>Obsidian-compatible [[wiki-links]]</div>
+    <div class="chip"><div class="chip-dot"></div>NotebookLM sourcing layer</div>
+    <div class="chip"><div class="chip-dot"></div>Git version control</div>
+    <div class="chip"><div class="chip-dot"></div>Bash stop hooks</div>
+    <div class="chip"><div class="chip-dot"></div>CUDA 6GB GPU — local embeddings</div>
+    <div class="chip"><div class="chip-dot"></div>Gemini 3.5 Flash — daily digest</div>
+    <div class="chip"><div class="chip-dot"></div>Google Search grounding</div>
+    <div class="chip"><div class="chip-dot"></div>Windows Task Scheduler — nightly commit + digest</div>
+    <div class="chip"><div class="chip-dot"></div>Vault-resident memory — 20-entry cap · self-archiving</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">TheVault</div>
+  <div class="footer-meta">Built by Suryanshu — 2026</div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  const nav = document.querySelector('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+</script>
+
+</body>
+</html>
