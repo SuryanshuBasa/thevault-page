@@ -35,6 +35,27 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
+    /* Cross-document View Transition — the VaultChat tile morphs into vaultchat.html's
+       hero (and back). Progressive enhancement: unsupported browsers just navigate. */
+    @view-transition { navigation: auto; }
+
+    /* Slow + ease the morph (default ~0.25s flashes by). Mirrored on vaultchat.html so the
+       reverse (back) navigation animates the same. */
+    ::view-transition-group(vaultchat-hero) {
+      animation-duration: .68s;
+      animation-timing-function: cubic-bezier(.62, 0, .12, 1);
+    }
+    ::view-transition-old(vaultchat-hero),
+    ::view-transition-new(vaultchat-hero) {
+      animation-duration: .52s;
+      animation-timing-function: cubic-bezier(.62, 0, .12, 1);
+    }
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: .55s;
+      animation-timing-function: cubic-bezier(.62, 0, .12, 1);
+    }
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -301,6 +322,15 @@
       transform: translateY(-4px); background: var(--elevated);
       border-color: var(--glass-brd-hi); box-shadow: 0 16px 40px rgba(0,0,0,.4);
     }
+
+    /* VaultChat tile is a link into its detail page (carries the morph name) */
+    a.feat { text-decoration: none; color: inherit; display: block; }
+    a.feat .feat-more {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+      font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--accent); transition: gap .25s;
+    }
+    a.feat:hover .feat-more { gap: 11px; }
 
     .feat-num {
       position: absolute; top: 22px; right: 24px;
@@ -649,8 +679,8 @@
 
   <div class="features reveal">
 
-    <!-- 01 -->
-    <div class="feat">
+    <!-- 01 — links to the VaultChat detail page (morphs into its hero) -->
+    <a class="feat accent" href="vaultchat.html" style="view-transition-name: vaultchat-hero">
       <div class="feat-num">01</div>
       <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
         <rect x="10" y="2" width="16" height="28" rx="3"/>
@@ -669,7 +699,10 @@
       </div>
       <div class="feat-tag">talk · plan · log</div>
       <div class="feat-tag">v1 live on phone</div>
-    </div>
+      <div class="feat-more">Explore VaultChat
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
 
     <!-- 02 -->
     <div class="feat">
