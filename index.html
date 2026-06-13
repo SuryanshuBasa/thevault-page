@@ -378,6 +378,9 @@
     .feat-left { display: flex; flex-direction: column; }
     .feat-right { padding-top: 4px; }
     .feat-pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+    /* lead featured card (Pi): center the rail against the body, and run the pills
+       as a full-width strip along the bottom so the card stays short and balanced. */
+    .feat.featured.feat-lead { align-items: center; }
 
     /* ── ACCENT FEAT (VaultChat — the one distinct hue) ── */
     .feat.accent {
@@ -686,7 +689,7 @@
   <div class="features reveal">
 
     <!-- Always-On Pi (FEATURED, accent) — the driving feature; morphs into pi.html -->
-    <a class="feat featured accent" href="pi.html" style="view-transition-name: pi-hero">
+    <a class="feat featured accent feat-lead" href="pi.html" style="view-transition-name: pi-hero">
       <div class="feat-left">
         <div class="feat-num">01</div>
         <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
@@ -697,11 +700,6 @@
           <path d="M15 10.5h11M15 25.5h11" stroke-linecap="round" opacity=".5"/>
         </svg>
         <div class="feat-title">Always-On — Self-Hosted on a Pi</div>
-        <div class="feat-pill-row">
-          <div class="feat-tag">Raspberry Pi 5 · 24/7</div>
-          <div class="feat-tag">two-way live mirror</div>
-          <div class="feat-tag">cron · Tailscale</div>
-        </div>
       </div>
       <div class="feat-right">
         <div class="feat-body">
@@ -711,6 +709,11 @@
           seconds, while each machine keeps its own git history for mutual backup. The
           schedulers became plain cron; the phone reaches it anywhere over Tailscale. A
           standalone personal AI OS in a box — brain on the Pi, workbench on the laptop.
+        </div>
+        <div class="feat-pill-row">
+          <div class="feat-tag">Raspberry Pi 5 · 24/7</div>
+          <div class="feat-tag">two-way live mirror</div>
+          <div class="feat-tag">cron · Tailscale</div>
         </div>
         <div class="feat-more">Explore the always-on host
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
