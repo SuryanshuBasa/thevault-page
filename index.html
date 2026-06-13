@@ -36,17 +36,21 @@
     html { scroll-behavior: smooth; }
 
     /* Cross-document View Transition — the VaultChat tile morphs into vaultchat.html's
-       hero (and back). Progressive enhancement: unsupported browsers just navigate. */
+       hero, and the Always-On tile into pi.html's (and back). Progressive enhancement:
+       unsupported browsers just navigate. */
     @view-transition { navigation: auto; }
 
-    /* Slow + ease the morph (default ~0.25s flashes by). Mirrored on vaultchat.html so the
-       reverse (back) navigation animates the same. */
-    ::view-transition-group(vaultchat-hero) {
+    /* Slow + ease the morph (default ~0.25s flashes by). Mirrored on the detail pages so
+       the reverse (back) navigation animates the same. */
+    ::view-transition-group(vaultchat-hero),
+    ::view-transition-group(pi-hero) {
       animation-duration: .68s;
       animation-timing-function: cubic-bezier(.62, 0, .12, 1);
     }
     ::view-transition-old(vaultchat-hero),
-    ::view-transition-new(vaultchat-hero) {
+    ::view-transition-new(vaultchat-hero),
+    ::view-transition-old(pi-hero),
+    ::view-transition-new(pi-hero) {
       animation-duration: .52s;
       animation-timing-function: cubic-bezier(.62, 0, .12, 1);
     }
@@ -318,6 +322,7 @@
     .features.in .feat:nth-child(8)  { transition-delay: .40s, 0s, 0s, 0s, 0s; }
     .features.in .feat:nth-child(9)  { transition-delay: .45s, 0s, 0s, 0s, 0s; }
     .features.in .feat:nth-child(10) { transition-delay: .50s, 0s, 0s, 0s, 0s; }
+    .features.in .feat:nth-child(11) { transition-delay: .55s, 0s, 0s, 0s, 0s; }
     .feat:hover {
       transform: translateY(-4px); background: var(--elevated);
       border-color: var(--glass-brd-hi); box-shadow: 0 16px 40px rgba(0,0,0,.4);
@@ -526,7 +531,7 @@
   <p class="hero-sub">
     A personal AI OS — a me-layer that knows you, backed by federated
     knowledge wikis and a self-curating memory that grows with every session.
-    Built entirely on Claude Code. Runs locally. Compounds over time.
+    Built entirely on Claude Code. Runs 24/7 on a Raspberry Pi. Compounds over time.
   </p>
   <div class="hero-cta">
     <a class="btn btn-primary" href="#capabilities">Explore capabilities</a>
@@ -587,6 +592,7 @@
         <div class="chip"><div class="chip-dot"></div>phone door · VaultChat</div>
         <div class="chip"><div class="chip-dot"></div>ASK / MAINTAIN modes</div>
         <div class="chip"><div class="chip-dot"></div>Git-versioned pages</div>
+        <div class="chip"><div class="chip-dot"></div>always-on host · Raspberry Pi 5</div>
       </div>
     </div>
 
@@ -654,7 +660,7 @@
       <!-- LOCAL RAG -->
       <rect x="18" y="228" width="364" height="44" rx="7" fill="#222222" stroke="rgba(204,122,58,.5)" stroke-width="1.3"/>
       <text x="200" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#cc7a3a">Local RAG — qmd</text>
-      <text x="200" y="266" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgba(236,236,236,.55)">BM25 + vector · 3 collections · 6GB GPU</text>
+      <text x="200" y="266" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgba(236,236,236,.55)">BM25 + vector · 3 collections · on-device CPU</text>
 
       <!-- arrow to hooks -->
       <line x1="200" y1="272" x2="200" y2="288" stroke="rgba(204,122,58,.4)" stroke-width="1" marker-end="url(#arr)"/>
@@ -734,8 +740,8 @@
       <div class="feat-title">Local RAG Search</div>
       <div class="feat-body">
         3-stage retrieval funnel: BM25 keyword + vector semantic hybrid. 1,800+
-        vectors across 3 collections on a local 6GB GPU. Section Map targeting
-        avoids reading full pages.
+        vectors across 3 collections, embedded on-device on the Pi's CPU. Section
+        Map targeting avoids reading full pages.
       </div>
       <div class="feat-tag">qmd engine</div>
     </div>
@@ -824,7 +830,7 @@
       </svg>
       <div class="feat-title">Daily AI Morning Brief</div>
       <div class="feat-body">
-        Automated email digest fires at 7am IST via Windows Task Scheduler. Gemini 3.5 Flash
+        Automated email digest fires at 7am IST via cron on the always-on Pi. Gemini 3.5 Flash
         with Google Search grounding covers 9 sections — investment, compute,
         hardware, research, sports science — filtered through your personal profile.
         19× cheaper than Claude web_search: $0.031/day vs $0.59.
@@ -842,18 +848,51 @@
       </svg>
       <div class="feat-title">Nightly Auto-Commit</div>
       <div class="feat-body">
-        Windows Task Scheduler fires at midnight. Stages all tracked and untracked
+        Cron on the always-on Pi fires at midnight. Stages all tracked and untracked
         changes, exits cleanly if nothing has changed, otherwise snapshots with a
         dated commit. Status written to a JSON file — the morning digest confirms
         whether it ran. The vault is always git-safe without a single manual step.
       </div>
-      <div class="feat-tag">Task Scheduler · git</div>
+      <div class="feat-tag">Pi cron · git</div>
     </div>
 
-    <!-- 10 — FEATURED -->
-    <div class="feat featured">
+    <!-- 10 — Self-hosted on Pi (FEATURED) — links to pi.html (morphs into its hero) -->
+    <a class="feat featured" href="pi.html" style="view-transition-name: pi-hero">
       <div class="feat-left">
         <div class="feat-num">10</div>
+        <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="5" y="6" width="26" height="9" rx="2"/>
+          <rect x="5" y="21" width="26" height="9" rx="2"/>
+          <circle cx="10" cy="10.5" r="1.1" fill="currentColor" stroke="none"/>
+          <circle cx="10" cy="25.5" r="1.1" fill="currentColor" stroke="none"/>
+          <path d="M15 10.5h11M15 25.5h11" stroke-linecap="round" opacity=".5"/>
+        </svg>
+        <div class="feat-title">Always-On — Self-Hosted on a Pi</div>
+        <div class="feat-pill-row">
+          <div class="feat-tag">Raspberry Pi 5 · 24/7</div>
+          <div class="feat-tag">two-way live mirror</div>
+          <div class="feat-tag">cron · Tailscale</div>
+        </div>
+      </div>
+      <div class="feat-right">
+        <div class="feat-body">
+          The whole second brain now lives on a Raspberry Pi 5 running 24/7 — VaultChat,
+          local RAG, and the nightly automations all run on-device, no laptop required.
+          A two-way Syncthing mirror keeps the Pi and the laptop bit-for-bit identical in
+          seconds, while each machine keeps its own git history for mutual backup. The
+          schedulers became plain cron; the phone reaches it anywhere over Tailscale. A
+          standalone personal AI OS in a box — brain on the Pi, workbench on the laptop.
+        </div>
+        <div class="feat-more">Explore the always-on host
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </a>
+
+    <!-- 11 — FEATURED -->
+    <div class="feat featured">
+      <div class="feat-left">
+        <div class="feat-num">11</div>
         <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4">
           <ellipse cx="18" cy="12" rx="12" ry="6"/>
           <path d="M6 12v6c0 3.3 5.4 6 12 6s12-2.7 12-6v-6"/>
@@ -946,10 +985,10 @@
     <div class="chip"><div class="chip-dot"></div>NotebookLM sourcing layer</div>
     <div class="chip"><div class="chip-dot"></div>Git version control</div>
     <div class="chip"><div class="chip-dot"></div>Bash stop hooks</div>
-    <div class="chip"><div class="chip-dot"></div>CUDA 6GB GPU — local embeddings</div>
+    <div class="chip"><div class="chip-dot"></div>Raspberry Pi 5 — 24/7 ARM host · CPU embeddings</div>
     <div class="chip"><div class="chip-dot"></div>Gemini 3.5 Flash — daily digest</div>
     <div class="chip"><div class="chip-dot"></div>Google Search grounding</div>
-    <div class="chip"><div class="chip-dot"></div>Windows Task Scheduler — nightly commit + digest</div>
+    <div class="chip"><div class="chip-dot"></div>Pi cron — nightly commit + digest</div>
     <div class="chip"><div class="chip-dot"></div>Vault-resident memory — 20-entry cap · self-archiving</div>
   </div>
 </section>
