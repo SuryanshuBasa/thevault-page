@@ -514,10 +514,22 @@
       .hero-cta { flex-direction: column; width: 100%; max-width: 280px; }
       .btn { justify-content: center; }
     }
+
+    /* Ambient — rising motes (fireflies after dark), matching the app + detail pages. */
+    .amb-motes { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .pg-mote { position: absolute; bottom: -5%; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-bright); opacity: 0; filter: blur(.5px); animation: pg-drift var(--d,22s) linear var(--dl,0s) infinite; }
+    @keyframes pg-drift { 0%{transform:translate3d(0,0,0);opacity:0;} 12%{opacity:.5;} 88%{opacity:.4;} 100%{transform:translate3d(var(--dx,10px),-108vh,0);opacity:0;} }
+    body[data-tod="night"] .pg-mote { background:#ffd27a; box-shadow:0 0 7px 1px rgba(255,210,122,.55); animation-name:pg-firefly; animation-duration:calc(var(--d,22s)*1.5); }
+    body[data-tod="night"] .pg-mote:nth-of-type(2n) { display:none; }
+    @keyframes pg-firefly { 0%{transform:translate3d(0,0,0);opacity:0;} 10%{opacity:.85;} 28%{opacity:.2;} 46%{opacity:.95;} 64%{opacity:.3;} 82%{opacity:.7;} 100%{transform:translate3d(var(--dx,10px),-108vh,0);opacity:0;} }
+    @media (prefers-reduced-motion: reduce) { .pg-mote { display: none !important; } }
   </style>
   <script>document.documentElement.className = 'js';</script>
 </head>
 <body>
+
+<!-- ambient motes layer (built by JS; fireflies after dark) -->
+<div class="amb-motes" aria-hidden="true"></div>
 
 <!-- NAV -->
 <nav>
@@ -1012,6 +1024,24 @@
   const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Ambient: rising motes (warm dust by day, gold fireflies after dark) — matches the app.
+  (function () {
+    const layer = document.querySelector('.amb-motes');
+    if (layer) {
+      for (let i = 0; i < 10; i++) {
+        const m = document.createElement('span');
+        m.className = 'pg-mote';
+        m.style.left = (6 + Math.random() * 88) + '%';
+        m.style.setProperty('--d', (18 + Math.random() * 14) + 's');
+        m.style.setProperty('--dl', (-Math.random() * 22) + 's');
+        m.style.setProperty('--dx', ((Math.random() * 2 - 1) * 28) + 'px');
+        layer.appendChild(m);
+      }
+    }
+    const h = new Date().getHours();
+    document.body.dataset.tod = (h >= 6 && h < 19) ? 'day' : 'night';
+  })();
 </script>
 
 </body>
