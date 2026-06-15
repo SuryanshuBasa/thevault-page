@@ -79,6 +79,43 @@
       opacity: .05;
     }
 
+    /* Ambient motion — matches the app: swaying bonsai + rising motes (fireflies after dark). */
+    @keyframes pg-sway {
+      0%, 100% { transform: translateY(-50%) rotate(-0.8deg); }
+      50%      { transform: translateY(-50%) rotate(0.8deg); }
+    }
+    .bonsai-watermark { transform-origin: 50% 80%; animation: pg-sway 15s ease-in-out infinite; }
+    @keyframes pg-sway-phone {
+      0%, 100% { transform: translateX(-50%) rotate(-1deg); }
+      50%      { transform: translateX(-50%) rotate(1deg); }
+    }
+    .phone-bonsai { transform-origin: 50% 88%; animation: pg-sway-phone 13s ease-in-out infinite; }
+
+    .amb-motes { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .pg-mote {
+      position: absolute; bottom: -5%;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent-bright); opacity: 0;
+      filter: blur(.5px);
+      animation: pg-drift var(--d, 22s) linear var(--dl, 0s) infinite;
+    }
+    @keyframes pg-drift {
+      0%   { transform: translate3d(0,0,0); opacity: 0; }
+      12%  { opacity: .5; }
+      88%  { opacity: .4; }
+      100% { transform: translate3d(var(--dx,10px), -108vh, 0); opacity: 0; }
+    }
+    body[data-tod="night"] .pg-mote {
+      background: #ffd27a; box-shadow: 0 0 7px 1px rgba(255,210,122,.55);
+      animation-name: pg-firefly; animation-duration: calc(var(--d, 22s) * 1.5);
+    }
+    body[data-tod="night"] .pg-mote:nth-of-type(2n) { display: none; }
+    @keyframes pg-firefly {
+      0%   { transform: translate3d(0,0,0); opacity: 0; }
+      10%  { opacity: .85; } 28% { opacity: .2; } 46% { opacity: .95; } 64% { opacity: .3; } 82% { opacity: .7; }
+      100% { transform: translate3d(var(--dx,10px), -108vh, 0); opacity: 0; }
+    }
+
     /* ── NAV ─────────────────────────────────────────── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -258,15 +295,21 @@
 </head>
 <body>
 
+<!-- ambient motes layer (built by JS; fireflies after dark) -->
+<div class="amb-motes" aria-hidden="true"></div>
+
 <!-- bonsai watermark (VaultChat's own motif) -->
-<svg class="bonsai-watermark" viewBox="0 0 180 260" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M90 224 C88 207 83 191 79 175 C75 159 76 143 79 127 C82 113 86 99 84 84 C82 71 80 58 81 46" stroke-width="3.5"/>
-  <path d="M80 172 C68 166 52 162 35 160" stroke-width="1.8"/><path d="M78 152 C90 147 106 143 124 142" stroke-width="1.8"/>
-  <path d="M80 120 C68 114 52 110 33 108" stroke-width="1.5"/><path d="M83 104 C95 99 110 95 128 93" stroke-width="1.5"/>
-  <path d="M83 76 C73 70 58 65 43 63" stroke-width="1.2"/><path d="M83 60 C93 55 106 51 118 50" stroke-width="1.2"/>
-  <circle cx="31" cy="144" r="19" stroke-width="1.2"/><circle cx="126" cy="128" r="18" stroke-width="1.2"/>
-  <circle cx="29" cy="94" r="17" stroke-width="1.2"/><circle cx="130" cy="79" r="17" stroke-width="1.2"/>
-  <circle cx="40" cy="51" r="16" stroke-width="1.2"/><circle cx="118" cy="37" r="14" stroke-width="1.2"/><circle cx="78" cy="28" r="21" stroke-width="1.2"/>
+<svg class="bonsai-watermark" viewBox="28 28 144 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M36 208 Q90 220 144 208 M32 198 Q90 190 148 198 M32 198 Q34 214 42 220 H138 Q146 214 148 198" stroke-width="2.1"/>
+  <path d="M58 190 Q90 184 122 190" stroke-width="1.3"/>
+  <path d="M88 190 C82 170 84 152 96 136 C112 116 118 98 114 78 C112 60 104 46 106 34" stroke-width="3.3"/>
+  <path d="M98 190 C94 174 96 160 106 146 C120 128 126 110 124 90 C122 68 116 52 118 40" stroke-width="2.3"/>
+  <path d="M94 136 C76 130 64 120 56 108" stroke-width="1.6"/>
+  <path d="M108 102 C120 94 128 82 132 70" stroke-width="1.5"/>
+  <path d="M108 128 C122 126 134 122 144 114" stroke-width="1.6"/>
+  <path d="M42 98 C50 88 66 86 78 92 C88 96 90 108 82 114 C70 122 52 122 40 114 C32 108 32 102 42 98" stroke-width="1.8"/>
+  <path d="M72 62 C82 48 102 46 116 52 C128 58 132 72 126 80 C116 88 96 88 80 82 C68 76 64 68 72 62" stroke-width="2"/>
+  <path d="M122 104 C132 94 148 94 158 100 C168 106 168 116 160 122 C148 128 132 128 120 122 C112 116 112 108 122 104" stroke-width="1.8"/>
 </svg>
 
 <!-- NAV -->
@@ -301,15 +344,17 @@
     <!-- Today surface -->
     <div class="phone">
       <div class="phone-screen">
-        <svg class="phone-bonsai" viewBox="0 0 180 260" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <ellipse cx="90" cy="254" rx="32" ry="5" stroke-width="1"/>
-          <path d="M68 243 L74 224 L106 224 L112 243 Z" stroke-width="1.5"/><rect x="65" y="239" width="50" height="6" rx="1.5" stroke-width="1.5"/>
-          <path d="M90 224 C88 207 83 191 79 175 C75 159 76 143 79 127 C82 113 86 99 84 84 C82 71 80 58 81 46" stroke-width="3.5"/>
-          <path d="M80 172 C68 166 52 162 35 160" stroke-width="1.8"/><path d="M78 152 C90 147 106 143 124 142" stroke-width="1.8"/>
-          <path d="M80 120 C68 114 52 110 33 108" stroke-width="1.5"/><path d="M83 104 C95 99 110 95 128 93" stroke-width="1.5"/>
-          <circle cx="31" cy="144" r="19" stroke-width="1.2"/><circle cx="126" cy="128" r="18" stroke-width="1.2"/>
-          <circle cx="29" cy="94" r="17" stroke-width="1.2"/><circle cx="130" cy="79" r="17" stroke-width="1.2"/>
-          <circle cx="40" cy="51" r="16" stroke-width="1.2"/><circle cx="118" cy="37" r="14" stroke-width="1.2"/><circle cx="78" cy="28" r="21" stroke-width="1.2"/>
+        <svg class="phone-bonsai" viewBox="28 28 144 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M36 208 Q90 220 144 208 M32 198 Q90 190 148 198 M32 198 Q34 214 42 220 H138 Q146 214 148 198" stroke-width="2.1"/>
+          <path d="M58 190 Q90 184 122 190" stroke-width="1.3"/>
+          <path d="M88 190 C82 170 84 152 96 136 C112 116 118 98 114 78 C112 60 104 46 106 34" stroke-width="3.3"/>
+          <path d="M98 190 C94 174 96 160 106 146 C120 128 126 110 124 90 C122 68 116 52 118 40" stroke-width="2.3"/>
+          <path d="M94 136 C76 130 64 120 56 108" stroke-width="1.6"/>
+          <path d="M108 102 C120 94 128 82 132 70" stroke-width="1.5"/>
+          <path d="M108 128 C122 126 134 122 144 114" stroke-width="1.6"/>
+          <path d="M42 98 C50 88 66 86 78 92 C88 96 90 108 82 114 C70 122 52 122 40 114 C32 108 32 102 42 98" stroke-width="1.8"/>
+          <path d="M72 62 C82 48 102 46 116 52 C128 58 132 72 126 80 C116 88 96 88 80 82 C68 76 64 68 72 62" stroke-width="2"/>
+          <path d="M122 104 C132 94 148 94 158 100 C168 106 168 116 160 122 C148 128 132 128 120 122 C112 116 112 108 122 104" stroke-width="1.8"/>
         </svg>
         <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date">2026-06-11</span><span class="scr-sync">synced</span></div>
         <div class="scr-jots">
@@ -353,13 +398,17 @@
       <div class="surface-col">
         <div class="phone">
           <div class="phone-screen">
-            <svg class="phone-bonsai" viewBox="0 0 180 260" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M90 224 C88 207 83 191 79 175 C75 159 76 143 79 127 C82 113 86 99 84 84 C82 71 80 58 81 46" stroke-width="3.5"/>
-              <path d="M80 172 C68 166 52 162 35 160" stroke-width="1.8"/><path d="M78 152 C90 147 106 143 124 142" stroke-width="1.8"/>
-              <path d="M80 120 C68 114 52 110 33 108" stroke-width="1.5"/><path d="M83 104 C95 99 110 95 128 93" stroke-width="1.5"/>
-              <circle cx="31" cy="144" r="19" stroke-width="1.2"/><circle cx="126" cy="128" r="18" stroke-width="1.2"/>
-              <circle cx="29" cy="94" r="17" stroke-width="1.2"/><circle cx="130" cy="79" r="17" stroke-width="1.2"/>
-              <circle cx="78" cy="28" r="21" stroke-width="1.2"/>
+            <svg class="phone-bonsai" viewBox="28 28 144 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M36 208 Q90 220 144 208 M32 198 Q90 190 148 198 M32 198 Q34 214 42 220 H138 Q146 214 148 198" stroke-width="2.1"/>
+              <path d="M58 190 Q90 184 122 190" stroke-width="1.3"/>
+              <path d="M88 190 C82 170 84 152 96 136 C112 116 118 98 114 78 C112 60 104 46 106 34" stroke-width="3.3"/>
+              <path d="M98 190 C94 174 96 160 106 146 C120 128 126 110 124 90 C122 68 116 52 118 40" stroke-width="2.3"/>
+              <path d="M94 136 C76 130 64 120 56 108" stroke-width="1.6"/>
+              <path d="M108 102 C120 94 128 82 132 70" stroke-width="1.5"/>
+              <path d="M108 128 C122 126 134 122 144 114" stroke-width="1.6"/>
+              <path d="M42 98 C50 88 66 86 78 92 C88 96 90 108 82 114 C70 122 52 122 40 114 C32 108 32 102 42 98" stroke-width="1.8"/>
+              <path d="M72 62 C82 48 102 46 116 52 C128 58 132 72 126 80 C116 88 96 88 80 82 C68 76 64 68 72 62" stroke-width="2"/>
+              <path d="M122 104 C132 94 148 94 158 100 C168 106 168 116 160 122 C148 128 132 128 120 122 C112 116 112 108 122 104" stroke-width="1.8"/>
             </svg>
             <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date">2026-06-11</span><span class="scr-sync">synced</span></div>
             <div class="scr-jots">
@@ -515,6 +564,24 @@
   const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Ambient: rising motes (warm dust by day, gold fireflies after dark) — matches the app.
+  (function () {
+    const layer = document.querySelector('.amb-motes');
+    if (layer) {
+      for (let i = 0; i < 10; i++) {
+        const m = document.createElement('span');
+        m.className = 'pg-mote';
+        m.style.left = (6 + Math.random() * 88) + '%';
+        m.style.setProperty('--d', (18 + Math.random() * 14) + 's');
+        m.style.setProperty('--dl', (-Math.random() * 22) + 's');
+        m.style.setProperty('--dx', ((Math.random() * 2 - 1) * 28) + 'px');
+        layer.appendChild(m);
+      }
+    }
+    const h = new Date().getHours();
+    document.body.dataset.tod = (h >= 6 && h < 19) ? 'day' : 'night';
+  })();
 </script>
 
 </body>
