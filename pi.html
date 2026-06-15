@@ -204,6 +204,9 @@
     .mirror-cap { font-family: var(--mono); font-size: 8.5px; letter-spacing: .1em; color: var(--text-mid); text-align: center; line-height: 1.5; }
     @keyframes dotRight { 0% { left: 6%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 90%; opacity: 0; } }
     @keyframes dotLeft  { 0% { right: 6%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { right: 90%; opacity: 0; } }
+    /* vertical variants — used when the connector goes column on mobile */
+    @keyframes dotDown { 0% { top: 6%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
+    @keyframes dotUp   { 0% { bottom: 6%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { bottom: 90%; opacity: 0; } }
 
     /* ── FEATURE GRID ────────────────────────────────── */
     .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -263,10 +266,17 @@
       .circuit-watermark { display: none; }
       .section, .full-band { padding: 68px 24px; }
       .nodes { grid-template-columns: 1fr; gap: 16px; }
-      .mirror-link { flex-direction: row; min-width: 0; padding: 6px 0; }
-      .mirror-line { width: 60px; height: 2px; }
+      /* stacked cards — turn the connector into a centered vertical link between them */
+      .mirror-link { flex-direction: column; min-width: 0; padding: 4px 0; gap: 8px; }
+      .mirror-line { width: 2px; height: 46px; background: linear-gradient(to bottom, transparent, var(--accent-brd) 18%, var(--accent-brd) 82%, transparent); }
+      .mirror-line::before, .mirror-line::after { top: auto; bottom: auto; left: 50%; right: auto; transform: translateX(-50%); }
+      .mirror-line::before { animation: dotDown 2.8s linear infinite; }
+      .mirror-line::after  { animation: dotUp 2.8s linear infinite; }
       .features { grid-template-columns: 1fr; }
-      .flow-arrow { transform: rotate(90deg); }
+      /* single-column vertical flow so each down-arrow sits cleanly between steps */
+      .flow { flex-direction: column; align-items: stretch; }
+      .flow-step { width: 100%; min-width: 0; flex: none; }
+      .flow-arrow { transform: rotate(90deg); align-self: center; }
       .steps { grid-template-columns: repeat(2, 1fr); gap: 36px 12px; }
       .steps::before { display: none; }
     }

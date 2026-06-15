@@ -286,6 +286,8 @@
       .section, .full-band { padding: 68px 24px; }
       .surfaces { grid-template-columns: 1fr; gap: 64px; }
       .features { grid-template-columns: 1fr; }
+      /* single column — drop the desktop lone-card centering, else it lands in a phantom col 2 */
+      .features .feat:last-child:nth-child(3n+1) { grid-column: auto; }
       .steps { grid-template-columns: repeat(2, 1fr); gap: 36px 12px; }
       .steps::before { display: none; }
     }
