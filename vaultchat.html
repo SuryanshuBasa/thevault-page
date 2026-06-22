@@ -221,10 +221,11 @@
 
     /* chat variant */
     .scr-msgs { flex: 1; min-height: 0; overflow: hidden; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 2; }
-    /* Mirrors the real app's document-style chat: user = bubble; assistant = full-width
-       flowing text with a left accent rail (no box); tools = a mono timeline strip with ✓. */
-    .bub { max-width: 84%; font-size: 11px; line-height: 1.55; padding: 10px 13px; border-radius: 14px; }
-    .bub.me { align-self: flex-end; background: var(--accent-dim); border: 1px solid var(--accent-brd); color: rgba(236,236,236,.9); border-bottom-right-radius: 5px; }
+    /* Mirrors the real app's document-style chat: both sides flat (no boxes) with mirrored
+       accent rails — user right-aligned w/ rail on the right, assistant left w/ rail on the
+       left; tools = a mono timeline strip with ✓. */
+    .bub.me { align-self: stretch; position: relative; padding: 0 11px 0 0; font-size: 11px; line-height: 1.6; color: rgba(236,236,236,.9); text-align: right; }
+    .bub.me::after { content: ''; position: absolute; right: 0; top: 2px; bottom: 2px; width: 2px; border-radius: 2px; background: linear-gradient(var(--accent), transparent); }
     /* assistant reply — full width, no bubble, accent gradient rail down the left */
     .ai { align-self: stretch; position: relative; padding-left: 11px; font-size: 11px; line-height: 1.6; color: rgba(236,236,236,.85); }
     .ai::before { content: ''; position: absolute; left: 0; top: 2px; bottom: 2px; width: 2px; border-radius: 2px; background: linear-gradient(var(--accent), transparent); }
