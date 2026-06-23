@@ -928,12 +928,21 @@
           archived into <code style="font-size:11px;color:var(--accent)">memory/archive/</code>
           — never deleted, just deprioritised. The full memory store lives physically
           inside the Vault via a symlink: visible in any editor, version-controlled, portable.
-          Clone the repo to a new machine, create one symlink, memory travels with you.
+          Clone the repo to a new machine, create one symlink, memory travels with you.<br><br>
+          And it curates itself while you sleep. A nightly &ldquo;dream&rdquo; pass on the Pi
+          reviews the whole memory store and drafts cleanups — prune the concluded, merge
+          duplicates, fix drift, propose new cross-links — but never edits on its own. It
+          runs as a read-only agent that roams the actual Vault to <em>verify each claim
+          against the real files</em> before proposing, so every suggestion carries
+          file-and-line evidence. Proposals land in the morning brief; you audit and apply.
+          The memory gets sharper over time without you lifting a finger.
         </div>
         <div class="feat-pill-row">
           <div class="feat-tag">Hermes-inspired</div>
           <div class="feat-tag">vault-resident</div>
           <div class="feat-tag">self-archiving</div>
+          <div class="feat-tag">nightly self-curation</div>
+          <div class="feat-tag">vault-grounded · propose-only</div>
         </div>
       </div>
     </div>
