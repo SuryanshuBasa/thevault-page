@@ -173,7 +173,7 @@
     .hero-sub { font-size: 15px; color: var(--text-mid); max-width: 480px; line-height: 1.8; opacity: 0; animation: up .7s ease .46s forwards; }
     .hero-pills { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 30px; opacity: 0; animation: up .7s ease .62s forwards; }
     .hero-pill { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: var(--text-mid); padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid var(--glass-brd); }
-    .hero-phone-wrap { position: relative; z-index: 1; display: flex; justify-content: center; opacity: 0; animation: rise 1.1s cubic-bezier(.2,.8,.2,1) .5s forwards; }
+    .hero-phone-wrap { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; animation: rise 1.1s cubic-bezier(.2,.8,.2,1) .5s forwards; }
 
     /* ── PHONE MOCKUP ────────────────────────────────── */
     .phone {
@@ -208,6 +208,26 @@
     /* composer = detached frosted glass capsule (mirrors the app's variant-A redesign) */
     .scr-inputbar { margin: 0 14px 8px; display: flex; gap: 8px; align-items: center; padding: 5px 5px 5px 15px; border-radius: 22px; background: var(--glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 1px solid var(--glass-brd); box-shadow: 0 8px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06); position: relative; z-index: 2; }
     .scr-input { flex: 1; font-size: 11px; color: var(--text-low); padding: 7px 0; }
+    /* live composer inputs in the hero — real <input>, transparent chrome */
+    input.scr-input { background: transparent; border: 0; outline: 0; width: 100%; min-width: 0; font-family: inherit; color: var(--text); }
+    input.scr-input::placeholder { color: var(--text-low); }
+    .scr-add, .scr-send { cursor: pointer; }
+    /* the hero phone is a live demo: views stack, lists scroll inside the frame */
+    .scr-view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .scr-view[hidden] { display: none; }
+    .hero-phone-wrap .scr-jots, .hero-phone-wrap .scr-msgs { overflow-y: auto; scrollbar-width: none; }
+    .hero-phone-wrap .scr-jots::-webkit-scrollbar, .hero-phone-wrap .scr-msgs::-webkit-scrollbar { display: none; }
+    .hero-phone-wrap .scr-tab { cursor: pointer; }
+    /* Chat landing — scaled mirror of the app's cold-launch welcome */
+    .scr-welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 9px; padding: 26px 22px; -webkit-user-select: none; user-select: none; }
+    .scr-wordmark { font-family: var(--serif); font-style: italic; font-size: 27px; line-height: 1; background: linear-gradient(120deg, var(--accent-bright), var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: var(--accent); }
+    .scr-greet-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .scr-greet { font-size: 11.5px; color: var(--text-mid); line-height: 1.5; max-width: 200px; }
+    .scr-reach { font-family: var(--mono); font-size: 8.5px; letter-spacing: .05em; color: var(--text-low); display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 3px; }
+    .scr-reach svg { width: 11px; height: 11px; flex-shrink: 0; }
+    /* "try it" hint under the live phone */
+    .hero-try { margin-top: 18px; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: .04em; color: var(--text-low); opacity: 0; animation: up .7s ease .9s forwards; }
+    .hero-try b { color: var(--accent); font-weight: 600; }
     .scr-add { font-size: 10px; color: #fff; font-weight: 600; padding: 8px 15px; border-radius: 14px; background: var(--accent); flex-shrink: 0; }
     /* Chat send = gradient orb */
     .scr-send { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: radial-gradient(circle at 30% 25%, var(--accent-bright), var(--accent)); box-shadow: 0 3px 12px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.3); }
@@ -369,21 +389,43 @@
   </div>
 
   <div class="hero-phone-wrap">
-    <!-- Today surface -->
+    <!-- Live demo: tabs switch views, the composer adds a jot, Chat answers. (wired in JS) -->
     <div class="phone">
       <div class="phone-screen">
         <div class="phone-motes" aria-hidden="true"></div>
         <div class="phone-bonsai" aria-hidden="true"></div>
-        <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date">2026-06-11</span><span class="scr-sync">synced</span></div>
-        <div class="scr-jots">
-          <div class="jot"><span class="t">07:14</span><span class="x">woke up, legs sore from the pull set</span></div>
-          <div class="jot"><span class="t">09:30</span><span class="x">swim: 2k, strong on the back half</span></div>
-          <div class="jot"><span class="t">13:00</span><span class="x">ECE6100 pset due Thursday — start tonight</span></div>
-          <div class="jot"><span class="t">18:42</span><span class="x">idea: log race-prep notes straight from poolside</span></div>
+
+        <!-- Today view -->
+        <div class="scr-view" data-v="today">
+          <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date">2026-06-24</span><span class="scr-sync">synced</span></div>
+          <div class="scr-jots">
+            <div class="jot"><span class="t">07:14</span><span class="x">woke up, legs sore from the pull set</span></div>
+            <div class="jot"><span class="t">09:30</span><span class="x">swim: 2k, strong on the back half</span></div>
+            <div class="jot"><span class="t">13:00</span><span class="x">ECE6100 pset due Thursday — start tonight</span></div>
+            <div class="jot"><span class="t">18:42</span><span class="x">idea: log race-prep notes straight from poolside</span></div>
+          </div>
+          <div class="scr-inputbar"><input class="scr-input" data-add type="text" placeholder="What's happening…" aria-label="Add a jot"><span class="scr-add" data-add-btn>Add</span></div>
         </div>
-        <div class="scr-inputbar"><span class="scr-input">What's happening…</span><span class="scr-add">Add</span></div>
-        <div class="scr-tabs"><span class="scr-tab active">Today</span><span class="scr-tab">Chat</span></div>
-        <!-- press & hold a jot above lifts it to the foreground here (wired in JS) -->
+
+        <!-- Chat view -->
+        <div class="scr-view" data-v="chat" hidden>
+          <div class="scr-top scr-top-chat"><svg class="scr-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span class="scr-title">Ask your vault</span></div>
+          <div class="scr-msgs">
+            <div class="scr-welcome">
+              <div class="scr-wordmark">VaultChat</div>
+              <p class="scr-greet-name">Good evening, Anshu.</p>
+              <p class="scr-greet">What are we digging into?</p>
+              <span class="scr-reach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>academics · swimming · your daily logs</span>
+            </div>
+          </div>
+          <div class="scr-inputbar"><input class="scr-input" data-ask type="text" placeholder="Ask your vault…" aria-label="Ask your vault"><span class="scr-send" data-ask-btn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></span></div>
+          <div class="scr-meta">Sonnet 4.6 · $0.06</div>
+        </div>
+
+        <!-- shared tabs switch the two views -->
+        <div class="scr-tabs"><span class="scr-tab active" data-go="today">Today</span><span class="scr-tab" data-go="chat">Chat</span></div>
+
+        <!-- press & hold a jot lifts it to the foreground here -->
         <div class="scr-sheet" hidden>
           <div class="scr-sheet-card">
             <span class="scr-sheet-time"></span>
@@ -397,6 +439,7 @@
         </div>
       </div>
     </div>
+    <p class="hero-try">↑ a low-fidelity demo — <b>add a jot</b>, or hit <b>Chat</b> and ask your vault</p>
   </div>
 </section>
 
@@ -665,7 +708,7 @@
     }
     sheet.addEventListener('click', close);   // tap backdrop / card / a pill dismisses the demo
 
-    wrap.querySelectorAll('.scr-jots .jot').forEach(row => {
+    const wireJot = row => {
       let t = null, sx = 0, sy = 0;
       const start = e => { const p = e.touches ? e.touches[0] : e; sx = p.clientX; sy = p.clientY;
         t = setTimeout(() => { if (navigator.vibrate) navigator.vibrate(8); open(row); t = null; }, 380); };
@@ -680,7 +723,63 @@
       row.addEventListener('mousemove', move);
       row.addEventListener('mouseup', cancel);
       row.addEventListener('mouseleave', cancel);
-    });
+    };
+    wrap.querySelectorAll('.scr-jots .jot').forEach(wireJot);
+
+    // ── live demo: tab switching, jot capture, scripted vault answer ──
+    const el = (tag, cls, txt) => { const n = document.createElement(tag); n.className = cls; if (txt != null) n.textContent = txt; return n; };
+    const tabs = [...wrap.querySelectorAll('.scr-tab')];
+    const views = [...wrap.querySelectorAll('.scr-view')];
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      views.forEach(v => v.hidden = v.dataset.v !== tab.dataset.go);
+    }));
+
+    // Today: type → Add appends a timestamped jot (and it's press-holdable too)
+    const jots = wrap.querySelector('.scr-jots');
+    const addIn = wrap.querySelector('[data-add]');
+    const addJot = () => {
+      const v = addIn.value.trim(); if (!v) return;
+      const d = new Date(), hh = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      const row = el('div', 'jot');
+      row.append(el('span', 't', hh), el('span', 'x', v));
+      jots.append(row); wireJot(row);
+      addIn.value = ''; jots.scrollTop = jots.scrollHeight;
+    };
+    wrap.querySelector('[data-add-btn]').addEventListener('click', addJot);
+    addIn.addEventListener('keydown', e => { if (e.key === 'Enter') addJot(); });
+
+    // Chat: a scripted vault answer with a tool-timeline trace (honest preview reply)
+    const msgs = wrap.querySelector('.scr-msgs');
+    const askIn = wrap.querySelector('[data-ask]');
+    let thinking = false;
+    const bottom = () => { msgs.scrollTop = msgs.scrollHeight; };
+    // mirror the app's cold-launch greeting (time-of-day + a rotating prompt)
+    const h = new Date().getHours();
+    const part = h < 5 ? 'Late night' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Good night';
+    const prompts = ['What are we digging into?', 'Where should we pick up?', "What's on your mind?", "Your vault's ready when you are."];
+    const gn = wrap.querySelector('.scr-greet-name'), gp = wrap.querySelector('.scr-greet');
+    if (gn) gn.textContent = part + ', Anshu.';
+    if (gp) gp.textContent = prompts[Math.floor(Math.random() * prompts.length)];
+    const ask = () => {
+      const v = askIn.value.trim(); if (!v || thinking) return;
+      thinking = true; askIn.value = '';
+      const w = msgs.querySelector('.scr-welcome'); if (w) w.remove();   // leave the landing on first ask
+      msgs.append(el('div', 'bub me', v)); bottom();
+      setTimeout(() => {
+        const tl = el('div', 'scr-tl');
+        tl.append(el('div', 'scr-tl-head', 'Working · 2 steps'));
+        const s1 = el('div', 'scr-tl-step'); s1.append(el('span', 'tdot'), document.createTextNode('read · daily/2026-06-24.md'), el('span', 'tchk', '✓'));
+        const s2 = el('div', 'scr-tl-step'); s2.append(el('span', 'tdot'), document.createTextNode('qmd · vault · "' + v.slice(0, 20) + '"'), el('span', 'tchk', '✓'));
+        tl.append(s1, s2); msgs.append(tl); bottom();
+      }, 450);
+      setTimeout(() => {
+        msgs.append(el('div', 'ai', "I'd pull that straight from your vault — reading today's log and searching across your collections — then answer in your own context. This hero is a live preview; the real app runs on your actual notes."));
+        bottom(); thinking = false;
+      }, 1300);
+    };
+    wrap.querySelector('[data-ask-btn]').addEventListener('click', ask);
+    askIn.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
   })();
 </script>
 
