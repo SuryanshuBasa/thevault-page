@@ -219,6 +219,21 @@
     .scr-tab { flex: 1; text-align: center; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; color: var(--text-mid); padding: 10px 0; border-radius: 14px; }
     .scr-tab.active { color: #fff; background: linear-gradient(145deg, var(--accent), #a85f28); box-shadow: 0 2px 10px var(--accent-glow); }
 
+    /* jot sheet — press & hold lifts a jot to the foreground (mirrors the app's iOS-style sheet) */
+    .hero-phone-wrap .scr-jots .jot { cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    .scr-sheet { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 26px; }
+    .scr-sheet[hidden] { display: none; }
+    .scr-sheet::before { content: ''; position: absolute; inset: 0; background: rgba(10,9,6,.45); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); opacity: 0; transition: opacity .22s ease; }
+    .scr-sheet.show::before { opacity: 1; }
+    .scr-sheet.closing::before { opacity: 0; }
+    .scr-sheet-card { position: relative; width: 100%; background: var(--surface); border: 1px solid var(--glass-brd); border-radius: 16px; padding: 15px 15px 13px; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
+    .scr-sheet-time { display: block; font-family: var(--mono); font-size: 9.5px; color: var(--accent); margin-bottom: 7px; }
+    .scr-sheet-text { font-size: 12.5px; line-height: 1.55; color: var(--text); }
+    .scr-sheet-pills { position: relative; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .scr-pill { font-size: 10px; font-weight: 600; padding: 8px 15px; border-radius: 15px; background: var(--elevated); border: 1px solid var(--glass-brd); color: var(--text-mid); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+    .scr-pill.primary { color: #fff; background: linear-gradient(145deg, var(--accent), #a85f28); border-color: transparent; }
+    .scr-pill.danger { color: #ff9f0a; border-color: rgba(255,159,10,.25); }
+
     /* chat variant */
     .scr-msgs { flex: 1; min-height: 0; overflow: hidden; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 2; }
     /* Mirrors the real app's document-style chat: both sides flat (no boxes) with mirrored
@@ -368,6 +383,18 @@
         </div>
         <div class="scr-inputbar"><span class="scr-input">What's happening…</span><span class="scr-add">Add</span></div>
         <div class="scr-tabs"><span class="scr-tab active">Today</span><span class="scr-tab">Chat</span></div>
+        <!-- press & hold a jot above lifts it to the foreground here (wired in JS) -->
+        <div class="scr-sheet" hidden>
+          <div class="scr-sheet-card">
+            <span class="scr-sheet-time"></span>
+            <div class="scr-sheet-text"></div>
+          </div>
+          <div class="scr-sheet-pills">
+            <span class="scr-pill primary">Ask Claude</span>
+            <span class="scr-pill">Edit</span>
+            <span class="scr-pill danger">Delete</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -592,6 +619,68 @@
     });
     const h = new Date().getHours();
     document.body.dataset.tod = (h >= 6 && h < 19) ? 'day' : 'night';
+  })();
+
+  // Hero phone is a live demo: press & hold a jot to lift it to the foreground (mirrors the app).
+  (function () {
+    const wrap = document.querySelector('.hero-phone-wrap');
+    if (!wrap) return;
+    const sheet = wrap.querySelector('.scr-sheet');
+    const card = sheet.querySelector('.scr-sheet-card');
+    const timeEl = sheet.querySelector('.scr-sheet-time');
+    const textEl = sheet.querySelector('.scr-sheet-text');
+    const pills = sheet.querySelector('.scr-sheet-pills');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let srcRow = null, busy = false;
+
+    // transform mapping the card onto a jot's rect — the genie origin
+    const flip = row => {
+      const s = row.getBoundingClientRect(), d = card.getBoundingClientRect();
+      return `translate(${s.left - d.left}px,${s.top - d.top}px) scale(${s.width / d.width},${s.height / d.height})`;
+    };
+    function open(row) {
+      if (busy) return;
+      srcRow = row;
+      timeEl.textContent = row.querySelector('.t').textContent;
+      textEl.textContent = row.querySelector('.x').textContent;
+      sheet.hidden = false;
+      sheet.classList.add('show');
+      if (reduce) return;
+      card.style.transformOrigin = '0 0';
+      card.animate([{ transform: flip(row), opacity: .5 }, { transform: 'none', opacity: 1 }],
+        { duration: 320, easing: 'cubic-bezier(.2,.85,.25,1)' });
+      pills.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 256, delay: 58, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
+    }
+    function hide() { sheet.classList.remove('show', 'closing'); sheet.hidden = true; busy = false; }
+    function close() {
+      if (busy || !sheet.classList.contains('show')) return;
+      if (reduce || !srcRow) { hide(); return; }
+      busy = true;
+      card.style.transformOrigin = '0 0';
+      sheet.classList.add('closing');
+      pills.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(10px)' }], { duration: 160, fill: 'both' });
+      card.animate([{ transform: 'none', opacity: 1 }, { transform: flip(srcRow), opacity: .3 }],
+        { duration: 272, easing: 'cubic-bezier(.4,0,.7,1)' }).onfinish = hide;
+    }
+    sheet.addEventListener('click', close);   // tap backdrop / card / a pill dismisses the demo
+
+    wrap.querySelectorAll('.scr-jots .jot').forEach(row => {
+      let t = null, sx = 0, sy = 0;
+      const start = e => { const p = e.touches ? e.touches[0] : e; sx = p.clientX; sy = p.clientY;
+        t = setTimeout(() => { if (navigator.vibrate) navigator.vibrate(8); open(row); t = null; }, 380); };
+      const move = e => { const p = e.touches ? e.touches[0] : e; if (Math.hypot(p.clientX - sx, p.clientY - sy) > 10) cancel(); };
+      const cancel = () => { clearTimeout(t); t = null; };
+      row.addEventListener('touchstart', start, { passive: true });
+      row.addEventListener('touchmove', move, { passive: true });
+      row.addEventListener('touchend', cancel);
+      row.addEventListener('touchcancel', cancel);
+      row.addEventListener('contextmenu', e => e.preventDefault());
+      row.addEventListener('mousedown', start);
+      row.addEventListener('mousemove', move);
+      row.addEventListener('mouseup', cancel);
+      row.addEventListener('mouseleave', cancel);
+    });
   })();
 </script>
 
