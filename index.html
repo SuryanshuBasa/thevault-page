@@ -745,14 +745,17 @@
       </svg>
       <div class="feat-title">VaultChat — Phone Front Door</div>
       <div class="feat-body">
-        A second front door — the vault on your phone. Two surfaces: Today logs your day
-        offline-first and AI-free, straight into the daily file; Chat is the full you-first
-        agent you talk to, and it drafts plans and memory edits for you to confirm before
-        they're written. A PWA on FastAPI + SQLite, reachable anywhere through a private
-        Tailscale tunnel. v1 live, validated on-device.
+        A second front door — the vault on your phone. Three surfaces: Home is a glance at
+        where your day and your machines stand — a streak ring over today's quests, one line
+        that names any automation that went quiet, and the morning brief inline; Today logs
+        your day offline-first and AI-free, straight into the daily file; Chat is the full
+        you-first agent, now with web search, image and PDF attachments, and a video it can
+        watch and connect back to your wikis. A PWA on FastAPI + SQLite, reachable anywhere
+        through a private Tailscale tunnel.
       </div>
-      <div class="feat-tag">talk · plan · log</div>
-      <div class="feat-tag">v1 live on phone</div>
+      <div class="feat-tag">glance · log · talk</div>
+      <div class="feat-tag">streak tracker</div>
+      <div class="feat-tag">live on phone</div>
       <div class="feat-more">Explore VaultChat
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </div>
@@ -878,12 +881,15 @@
       </svg>
       <div class="feat-title">Daily AI Morning Brief</div>
       <div class="feat-body">
-        Automated email digest fires at 7am IST via cron on the always-on Pi. Gemini 3.5 Flash
-        with Google Search grounding covers 9 sections — investment, compute,
-        hardware, research, sports science — filtered through your personal profile.
-        19× cheaper than Claude web_search: $0.031/day vs $0.59.
+        Automated brief fires at 7am IST via cron on the always-on Pi — now a real pipeline,
+        not a prompt. It pulls the day's RSS across fifteen outlets, clusters the stories
+        that are the same story, and only then hands a ranked pool to the model, which
+        <em>summarises</em> what corroborated sources actually said — no invented significance.
+        Two zones, Tech and World, each item carrying its age and its sources. The composed
+        brief is a JSON object with two renderers: the email, and the Home tab of your phone.
       </div>
-      <div class="feat-tag">Gemini · Google Search</div>
+      <div class="feat-tag">RSS · clustering · Gemini</div>
+      <div class="feat-tag">one source, two renderers</div>
     </div>
 
     <!-- 09 -->
@@ -930,8 +936,10 @@
           inside the Vault via a symlink: visible in any editor, version-controlled, portable.
           Clone the repo to a new machine, create one symlink, memory travels with you.<br><br>
           And it curates itself while you sleep. A nightly &ldquo;dream&rdquo; pass on the Pi
-          reviews the whole memory store and drafts cleanups — prune the concluded, merge
-          duplicates, fix drift, propose new cross-links — but never edits on its own. It
+          reviews the whole memory store and drafts cleanups — trim what bloated, correct
+          what drifted, prune what concluded, merge what duplicates — but never edits on its
+          own. Its whole job is keeping the index small and true, because the index is what
+          actually gets loaded. It
           runs as a read-only agent that roams the actual Vault to <em>verify each claim
           against the real files</em> before proposing, so every suggestion carries
           file-and-line evidence. Proposals land in the morning brief; you audit and apply.
@@ -1000,7 +1008,7 @@
   </div>
 
   <div class="chips reveal">
-    <div class="chip"><div class="chip-dot"></div>Claude Code (Sonnet 4.6 · Opus 4.8 · Haiku 4.5)</div>
+    <div class="chip"><div class="chip-dot"></div>Claude Code (Opus 5 · Sonnet 5 · Haiku 4.5)</div>
     <div class="chip"><div class="chip-dot"></div>Python stop hooks — zero-token pipeline</div>
     <div class="chip"><div class="chip-dot"></div>qmd — local RAG engine</div>
     <div class="chip"><div class="chip-dot"></div>VaultChat PWA — FastAPI · SQLite · offline-first</div>
@@ -1010,8 +1018,8 @@
     <div class="chip"><div class="chip-dot"></div>Git version control</div>
     <div class="chip"><div class="chip-dot"></div>Bash stop hooks</div>
     <div class="chip"><div class="chip-dot"></div>Raspberry Pi 5 — 24/7 ARM host · CPU embeddings</div>
-    <div class="chip"><div class="chip-dot"></div>Gemini 3.5 Flash — daily digest</div>
-    <div class="chip"><div class="chip-dot"></div>Google Search grounding</div>
+    <div class="chip"><div class="chip-dot"></div>Gemini 2.5 Flash — digest composer</div>
+    <div class="chip"><div class="chip-dot"></div>RSS + clustering — digest pipeline</div>
     <div class="chip"><div class="chip-dot"></div>Pi cron — nightly commit + digest</div>
     <div class="chip"><div class="chip-dot"></div>Vault-resident memory — 20-entry cap · self-archiving</div>
   </div>

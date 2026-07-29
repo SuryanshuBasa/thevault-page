@@ -234,6 +234,29 @@
     .scr-send svg { width: 15px; height: 15px; }
     /* centred cost meta beneath the Chat capsule */
     .scr-meta { text-align: center; font-family: var(--mono); font-size: 8px; letter-spacing: .06em; color: var(--text-low); margin: 0 14px 8px; position: relative; z-index: 2; }
+    /* ── Home tab (glance): translucent cards so the emblem reads through, hero ring on top ── */
+    .scr-hm { flex: 1; min-height: 0; overflow: hidden; padding: 2px 14px 0; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 2; }
+    .scr-card { background: rgba(30,28,20,.38); border: 1px solid rgba(255,255,255,.07); border-radius: 20px; padding: 12px 13px 9px; }
+    .scr-card.fallen { filter: saturate(.35); border-color: rgba(190,70,60,.35); }
+    .scr-ring { --p: 0; width: 92px; height: 92px; margin: 0 auto 5px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: conic-gradient(var(--accent) calc(var(--p) * 1%), rgba(255,255,255,.08) 0); transition: background .45s ease; }
+    .scr-ring-in { width: 78px; height: 78px; border-radius: 50%; background: #17150e; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: 0 0 22px rgba(204,122,58,.22); }
+    .scr-flame { font-size: 13px; line-height: 1; }
+    .scr-streak { font-family: var(--serif); font-style: italic; font-size: 23px; color: var(--text); line-height: 1; }
+    .scr-trio { font-family: var(--mono); font-size: 7.5px; letter-spacing: .06em; color: var(--text-low); }
+    .scr-status { text-align: center; font-family: var(--serif); font-style: italic; font-size: 12px; color: var(--text-mid); margin-bottom: 9px; }
+    .scr-quest { display: flex; align-items: center; gap: 9px; padding: 7px 2px; border-top: 1px solid rgba(255,255,255,.05); cursor: pointer; -webkit-user-select: none; user-select: none; transition: opacity .25s ease; }
+    .scr-quest.done { opacity: 0; }
+    .scr-box { width: 13px; height: 13px; border-radius: 4px; border: 1.4px solid rgba(255,255,255,.28); flex-shrink: 0; }
+    .scr-quest-label { flex: 1; font-size: 11px; color: var(--text-mid); text-align: left; }
+    .scr-quest-count { font-family: var(--mono); font-size: 9px; color: var(--text-low); }
+    .scr-foot { display: flex; gap: 14px; justify-content: center; padding-top: 9px; font-family: var(--mono); font-size: 8px; letter-spacing: .06em; color: var(--text-low); }
+    .scr-health { display: flex; align-items: center; gap: 7px; padding: 0 4px; font-family: var(--mono); font-size: 8.5px; letter-spacing: .05em; color: var(--text-low); }
+    .scr-health i { width: 5px; height: 5px; border-radius: 50%; background: #6f9d5e; flex-shrink: 0; }
+    .scr-news-head { font-family: var(--mono); font-size: 8px; letter-spacing: .1em; color: var(--text-low); padding: 0 4px 2px; }
+    .scr-news-row { display: flex; align-items: baseline; gap: 8px; padding: 7px 2px; border-top: 1px solid rgba(255,255,255,.05); }
+    .scr-news-row:first-of-type { border-top: 0; }
+    .scr-news-row .x { flex: 1; font-size: 10.5px; color: var(--text-mid); text-align: left; line-height: 1.35; }
+    .scr-news-row .age { font-family: var(--mono); font-size: 8px; color: var(--text-low); flex-shrink: 0; }
     /* tab bar = floating frosted glass capsule with gradient-fill active pill (mirrors app) */
     .scr-tabs { display: flex; gap: 6px; margin: 0 14px 16px; padding: 5px; border-radius: 18px; background: var(--glass); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border: 1px solid var(--glass-brd); box-shadow: 0 8px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06); position: relative; z-index: 2; }
     .scr-tab { flex: 1; text-align: center; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; color: var(--text-mid); padding: 10px 0; border-radius: 14px; }
@@ -281,11 +304,13 @@
     .h2 { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(32px, 4.4vw, 52px); line-height: 1.06; color: var(--text); margin-bottom: 18px; }
     .lead { font-size: 14px; color: var(--text-mid); line-height: 1.85; max-width: 560px; margin-bottom: 48px; }
 
-    /* ── TWO SURFACES — two phones, the real surfaces ─── */
-    .surfaces { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+    /* ── THREE SURFACES — three phones, the real surfaces ─── */
+    .surfaces { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: start; }
     .surface-col { display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .surface-col .phone { transform: scale(.92); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
-    .surface-col:hover .phone { transform: scale(.96) translateY(-6px); }
+    .surface-col .phone { transform: scale(.84); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+    .surface-col:hover .phone { transform: scale(.88) translateY(-6px); }
+    /* three phones need ~914px of column; collapse to one before they crush */
+    @media (max-width: 1080px) { .surfaces { grid-template-columns: 1fr; gap: 64px; } .surface-col .phone { transform: scale(.92); } .surface-col:hover .phone { transform: scale(.96) translateY(-6px); } }
     .surface-cap { margin-top: 30px; max-width: 360px; }
     .surface-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
     .surface-name { font-family: var(--serif); font-style: italic; font-size: 30px; color: var(--text); margin: 8px 0 12px; }
@@ -305,7 +330,7 @@
     .feat-tag { display: inline-block; margin-top: 16px; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid var(--glass-brd); font-family: var(--mono); font-size: 8.5px; letter-spacing: .07em; color: var(--text-mid); }
 
     /* ── HOW IT PLUGS IN ─────────────────────────────── */
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 56px; position: relative; }
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 56px; position: relative; }
     .steps::before { content: ''; position: absolute; top: 29px; left: 12%; right: 12%; height: 1px; background: linear-gradient(to right, transparent, var(--accent-brd) 20%, var(--accent-brd) 80%, transparent); }
     .step { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 12px; }
     .step-ring { width: 58px; height: 58px; border-radius: 50%; border: 1px solid var(--accent-brd); background: var(--surface); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 14px; color: var(--accent); margin-bottom: 22px; position: relative; z-index: 1; transition: transform .3s, background .3s, box-shadow .3s; }
@@ -376,11 +401,12 @@
     <div class="hero-eyebrow">Phone Front Door</div>
     <h1 class="hero-title">Vault<em>Chat</em></h1>
     <p class="hero-sub">
-      The vault in your pocket. Talk to your second brain and capture your day from your
-      phone — the same you-first agent as the desktop, plus a dead-simple log that works
-      with zero signal. A second door into the me-layer.
+      The vault in your pocket. Three surfaces: Home shows where your day and your machines
+      stand, Today logs your day with zero signal, and Chat is the same you-first agent as
+      the desktop. A second door into the me-layer.
     </p>
     <div class="hero-pills">
+      <span class="hero-pill">glance home · streak tracker</span>
       <span class="hero-pill">offline-first capture</span>
       <span class="hero-pill">you-first chat</span>
       <span class="hero-pill">installable PWA</span>
@@ -395,9 +421,36 @@
         <div class="phone-motes" aria-hidden="true"></div>
         <div class="phone-bonsai" aria-hidden="true"></div>
 
+        <!-- Home view — the landing tab: today's streak on top, the machines underneath -->
+        <div class="scr-view" data-v="home">
+          <div class="scr-top"><span class="scr-title">Home</span><span class="scr-date" data-today>2026-07-29</span><span class="scr-sync">synced</span></div>
+          <div class="scr-hm">
+            <div class="scr-card">
+              <div class="scr-ring" data-ring style="--p:25">
+                <div class="scr-ring-in">
+                  <span class="scr-flame">🔥</span>
+                  <span class="scr-streak">14</span>
+                  <span class="scr-trio">✨ 6 · ❄ 2</span>
+                </div>
+              </div>
+              <div class="scr-status" data-qleft>3 quests left</div>
+              <div class="scr-quest" data-quest><span class="scr-box"></span><span class="scr-quest-label">Swim — 2k</span></div>
+              <div class="scr-quest" data-quest><span class="scr-box"></span><span class="scr-quest-label">Water — 8 glasses</span><span class="scr-quest-count">5/8</span></div>
+              <div class="scr-quest" data-quest><span class="scr-box"></span><span class="scr-quest-label">Read — 20 min</span></div>
+              <div class="scr-foot"><span>log · 3</span><span>manage · history</span></div>
+            </div>
+            <div class="scr-health"><i></i>All clear · 4 automations reported</div>
+            <div class="scr-card">
+              <div class="scr-news-head">TODAY'S NEWS · TECH</div>
+              <div class="scr-news-row"><span class="x">Chip supply eases as fab capacity comes online</span><span class="age">6h</span></div>
+              <div class="scr-news-row"><span class="x">New long-context results land on open benchmarks</span><span class="age">11h</span></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Today view -->
-        <div class="scr-view" data-v="today">
-          <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date">2026-06-24</span><span class="scr-sync">synced</span></div>
+        <div class="scr-view" data-v="today" hidden>
+          <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date" data-today>2026-07-29</span><span class="scr-sync">synced</span></div>
           <div class="scr-jots">
             <div class="jot"><span class="t">07:14</span><span class="x">woke up, legs sore from the pull set</span></div>
             <div class="jot"><span class="t">09:30</span><span class="x">swim: 2k, strong on the back half</span></div>
@@ -419,11 +472,11 @@
             </div>
           </div>
           <div class="scr-inputbar"><input class="scr-input" data-ask type="text" placeholder="Ask your vault…" aria-label="Ask your vault"><span class="scr-send" data-ask-btn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></span></div>
-          <div class="scr-meta">Sonnet 4.6 · $0.06</div>
+          <div class="scr-meta">Sonnet 5 · $0.06</div>
         </div>
 
-        <!-- shared tabs switch the two views -->
-        <div class="scr-tabs"><span class="scr-tab active" data-go="today">Today</span><span class="scr-tab" data-go="chat">Chat</span></div>
+        <!-- shared tabs switch the three views -->
+        <div class="scr-tabs"><span class="scr-tab active" data-go="home">Home</span><span class="scr-tab" data-go="today">Today</span><span class="scr-tab" data-go="chat">Chat</span></div>
 
         <!-- press & hold a jot lifts it to the foreground here -->
         <div class="scr-sheet" hidden>
@@ -439,7 +492,7 @@
         </div>
       </div>
     </div>
-    <p class="hero-try">↑ a low-fidelity demo — <b>add a jot</b>, or hit <b>Chat</b> and ask your vault</p>
+    <p class="hero-try">↑ a low-fidelity demo — <b>tap a quest</b> to move the ring, <b>add a jot</b>, or hit <b>Chat</b> and ask your vault</p>
   </div>
 </section>
 
@@ -457,30 +510,67 @@
   </div>
 </section>
 
-<!-- TWO SURFACES -->
+<!-- THREE SURFACES -->
 <div class="full-band">
   <div class="band-inner">
     <div class="reveal">
       <div class="eyebrow">The mental model</div>
-      <h2 class="h2">Two surfaces,<br>one clean split</h2>
-      <p class="lead">One app, two jobs, deliberately kept apart. Capture must be instant and bulletproof; retrieval must be smart. They never blur.</p>
+      <h2 class="h2">Three surfaces,<br>one clean split</h2>
+      <p class="lead">One app, three jobs, deliberately kept apart. A glance must be instant and read-only; capture must be bulletproof and offline; retrieval must be smart. They never blur.</p>
     </div>
 
     <div class="surfaces reveal reveal-d1">
+      <!-- Home -->
+      <div class="surface-col">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="phone-motes" aria-hidden="true"></div>
+            <div class="phone-bonsai" aria-hidden="true"></div>
+            <div class="scr-top"><span class="scr-title">Home</span><span class="scr-date" data-today>2026-07-29</span><span class="scr-sync">synced</span></div>
+            <div class="scr-hm">
+              <div class="scr-card">
+                <div class="scr-ring" style="--p:100">
+                  <div class="scr-ring-in">
+                    <span class="scr-flame">🔥</span>
+                    <span class="scr-streak">15</span>
+                    <span class="scr-trio">✨ 7 · ❄ 2</span>
+                  </div>
+                </div>
+                <div class="scr-status">Day cleared</div>
+                <div class="scr-foot"><span>log · 3</span><span>manage · history</span></div>
+              </div>
+              <div class="scr-health"><i></i>All clear · 4 automations reported</div>
+              <div class="scr-card">
+                <div class="scr-news-head">TODAY'S NEWS · TECH</div>
+                <div class="scr-news-row"><span class="x">Chip supply eases as fab capacity comes online</span><span class="age">6h</span></div>
+                <div class="scr-news-row"><span class="x">New long-context results land on open benchmarks</span><span class="age">11h</span></div>
+              </div>
+            </div>
+            <div class="scr-tabs"><span class="scr-tab active">Home</span><span class="scr-tab">Today</span><span class="scr-tab">Chat</span></div>
+          </div>
+        </div>
+        <div class="surface-cap">
+          <div class="surface-tag">Home · glance</div>
+          <div class="surface-name">Where the day stands</div>
+          <div class="surface-desc">The landing screen: top is you — a streak ring and only the quests still outstanding, so the card shrinks as the day clears. Bottom is your machines — one health line that names any automation that went quiet, and the morning brief rendered inline.</div>
+          <div class="surface-meta"><span>one API call</span><span>read-only</span><span>no LLM</span></div>
+        </div>
+      </div>
+
       <!-- Today -->
       <div class="surface-col">
         <div class="phone">
           <div class="phone-screen">
             <div class="phone-motes" aria-hidden="true"></div>
             <div class="phone-bonsai" aria-hidden="true"></div>
-            <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date">2026-06-11</span><span class="scr-sync">synced</span></div>
+            <div class="scr-top"><span class="scr-title">Today</span><span class="scr-date" data-today>2026-07-29</span><span class="scr-sync">synced</span></div>
             <div class="scr-jots">
               <div class="jot"><span class="t">07:14</span><span class="x">woke up, slept badly</span></div>
               <div class="jot"><span class="t">09:30</span><span class="x">swim: 2k, strong on pull</span></div>
               <div class="jot"><span class="t">13:00</span><span class="x">pset due Thursday</span></div>
             </div>
             <div class="scr-inputbar"><span class="scr-input">What's happening…</span><span class="scr-add">Add</span></div>
-            <div class="scr-tabs"><span class="scr-tab active">Today</span><span class="scr-tab">Chat</span></div>
+            <div class="scr-tabs"><span class="scr-tab">Home</span><span class="scr-tab active">Today</span><span class="scr-tab">Chat</span></div>
           </div>
         </div>
         <div class="surface-cap">
@@ -502,7 +592,7 @@
               <div class="bub me">how did training go this week?</div>
               <div class="scr-tl">
                 <div class="scr-tl-head">Worked · 2 steps</div>
-                <div class="scr-tl-step"><span class="tdot"></span>read · daily/2026-06-11.md<span class="tchk">✓</span></div>
+                <div class="scr-tl-step"><span class="tdot"></span>read · daily/2026-07-29.md<span class="tchk">✓</span></div>
                 <div class="scr-tl-step"><span class="tdot"></span>qmd · swimming · "pull sets"<span class="tchk">✓</span></div>
               </div>
               <div class="ai">Three swims, all with strong pull work. Thursday's 2k held pace on the back half.</div>
@@ -510,8 +600,8 @@
               <div class="ai">Drafted a memory entry — want me to write it?</div>
             </div>
             <div class="scr-inputbar"><span class="scr-input">Ask your vault…</span><span class="scr-send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></span></div>
-            <div class="scr-meta">Sonnet 4.6 · $0.06</div>
-            <div class="scr-tabs"><span class="scr-tab">Today</span><span class="scr-tab active">Chat</span></div>
+            <div class="scr-meta">Sonnet 5 · $0.06</div>
+            <div class="scr-tabs"><span class="scr-tab">Home</span><span class="scr-tab">Today</span><span class="scr-tab active">Chat</span></div>
           </div>
         </div>
         <div class="surface-cap">
@@ -529,6 +619,34 @@
 <section class="section">
   <div class="reveal"><div class="eyebrow">Capabilities</div><h2 class="h2">What makes it<br>trustworthy</h2></div>
   <div class="features reveal reveal-d1">
+
+    <div class="feat">
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="18" cy="18" r="13" opacity=".35"/><path d="M18 5a13 13 0 0 1 11.3 19.4" stroke-linecap="round"/><circle cx="18" cy="18" r="4.5"/></svg>
+      <div class="feat-title">A Streak You Can Lose</div>
+      <div class="feat-body">Daily quests behind a flame that only ticks on a full clear — with a halo for consistency and freezes that absorb one bad day. Miss without one and it falls: the card desaturates, the glow dies, and the voice turns from serif to red mono until you clear again. Habits you're only <em>watching</em> — cigarettes, drinks — are tallied separately and can never break the streak, so honest logging is never punished.</div>
+      <div class="feat-tag">flame · halo · freeze · fallen</div>
+    </div>
+
+    <div class="feat">
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="7" width="28" height="22" rx="4"/><path d="M4 14h28" opacity=".5"/><path d="M9 20h10M9 24h6" stroke-linecap="round" opacity=".7"/><circle cx="26" cy="22" r="3.5"/></svg>
+      <div class="feat-title">One Screen For The Whole System</div>
+      <div class="feat-body">Home is the landing tab and it's read-only: the tracker on top, your machines underneath. One quiet line reads "All clear" most mornings and <em>names the offender</em> when it doesn't — "nightly commit — no report in 16 days". Under it, the morning brief renders natively inline. Six vault files, one API call, no polling and no cache to go stale.</div>
+      <div class="feat-tag">GET /api/home · one call</div>
+    </div>
+
+    <div class="feat">
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="8" width="30" height="20" rx="4"/><path d="M15 14l8 4-8 4z" stroke-linejoin="round"/></svg>
+      <div class="feat-title">Watch A Video With It</div>
+      <div class="feat-body">Paste a URL in Chat and ask whatever you want. It pulls the transcript — captions only, no download — answers straight from it, and connects the content back to your own wikis when the question invites it. Same thread, no mode switch, nothing stored.</div>
+      <div class="feat-tag">yt-dlp · ephemeral</div>
+    </div>
+
+    <div class="feat">
+      <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="18" cy="18" r="13"/><path d="M5 18h26M18 5c3.5 4 3.5 22 0 26M18 5c-3.5 4-3.5 22 0 26" opacity=".55"/></svg>
+      <div class="feat-title">No Reason To Open The Other App</div>
+      <div class="feat-body">Web search runs server-side and lands cited results in context, tailored through the personal charter it already loaded. Images and PDFs upload once and are referenced by id, so the bytes never re-upload per turn. Continued threads read the prior conversation from cache, and every thread carries its own running cost in dollars.</div>
+      <div class="feat-tag">web search · files · cached · costed</div>
+    </div>
 
     <div class="feat">
       <svg class="feat-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M18 4v8M18 24v8M4 18h8M24 18h8" stroke-linecap="round" opacity=".5"/><circle cx="18" cy="18" r="6"/></svg>
@@ -590,7 +708,8 @@
       <div class="step"><div class="step-ring">01</div><div class="step-title">Same me-layer</div><div class="step-body">Not a new brain — the second front door into the existing personal layer.</div></div>
       <div class="step"><div class="step-ring">02</div><div class="step-title">Capture writes in</div><div class="step-body">Today's jots land in the vault's dated daily files — the charter's own format.</div></div>
       <div class="step"><div class="step-ring">03</div><div class="step-title">Chat reads across</div><div class="step-body">Retrieves from the knowledge wikis via the same local RAG engine as desktop.</div></div>
-      <div class="step"><div class="step-ring">04</div><div class="step-title">All git-versioned</div><div class="step-body">Everything it writes is plain markdown in the repo — snapshotted nightly.</div></div>
+      <div class="step"><div class="step-ring">04</div><div class="step-title">Home renders the rest</div><div class="step-body">Reads the state files the nightly automations already write — no second source of truth.</div></div>
+      <div class="step"><div class="step-ring">05</div><div class="step-title">All git-versioned</div><div class="step-body">Everything it writes — jots, memory, even the streak — is plain markdown and JSON in the repo, snapshotted nightly.</div></div>
     </div>
   </div>
 </div>
@@ -607,6 +726,9 @@
     <div class="chip"><div class="chip-dot"></div>Tailscale — private remote access</div>
     <div class="chip"><div class="chip-dot"></div>SSE streaming + tool cards</div>
     <div class="chip"><div class="chip-dot"></div>Native iOS dictation</div>
+    <div class="chip"><div class="chip-dot"></div>yt-dlp — caption-only transcripts</div>
+    <div class="chip"><div class="chip-dot"></div>Files API — images + PDFs</div>
+    <div class="chip"><div class="chip-dot"></div>tracker.json — git-versioned streak</div>
   </div>
 </section>
 
@@ -735,6 +857,25 @@
       views.forEach(v => v.hidden = v.dataset.v !== tab.dataset.go);
     }));
 
+    // Home: tapping a quest row logs it — the ring moves by that quest's fraction and the
+    // card shrinks as the day clears, exactly like the app's tracker card.
+    const ring = wrap.querySelector('[data-ring]');
+    const qLeft = wrap.querySelector('[data-qleft]');
+    const quests = [...wrap.querySelectorAll('[data-quest]')];
+    let cleared = 1;   // Water is already 5/8 → the ring starts a quarter filled
+    quests.forEach(row => row.addEventListener('click', () => {
+      if (row.classList.contains('done')) return;
+      row.classList.add('done');
+      cleared++;
+      ring.style.setProperty('--p', Math.round(cleared / (quests.length + 1) * 100));
+      const left = quests.filter(r => !r.classList.contains('done')).length;
+      qLeft.textContent = left ? left + (left === 1 ? ' quest left' : ' quests left') : 'Day cleared';
+      setTimeout(() => row.remove(), 280);
+    }));
+    // keep the demo's date honest without a build step
+    const iso = new Date().toLocaleDateString('en-CA');
+    wrap.querySelectorAll('[data-today]').forEach(n => n.textContent = iso);
+
     // Today: type → Add appends a timestamped jot (and it's press-holdable too)
     const jots = wrap.querySelector('.scr-jots');
     const addIn = wrap.querySelector('[data-add]');
@@ -769,7 +910,7 @@
       setTimeout(() => {
         const tl = el('div', 'scr-tl');
         tl.append(el('div', 'scr-tl-head', 'Working · 2 steps'));
-        const s1 = el('div', 'scr-tl-step'); s1.append(el('span', 'tdot'), document.createTextNode('read · daily/2026-06-24.md'), el('span', 'tchk', '✓'));
+        const s1 = el('div', 'scr-tl-step'); s1.append(el('span', 'tdot'), document.createTextNode('read · daily/' + iso + '.md'), el('span', 'tchk', '✓'));
         const s2 = el('div', 'scr-tl-step'); s2.append(el('span', 'tdot'), document.createTextNode('qmd · vault · "' + v.slice(0, 20) + '"'), el('span', 'tchk', '✓'));
         tl.append(s1, s2); msgs.append(tl); bottom();
       }, 450);
